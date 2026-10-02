@@ -1,10 +1,11 @@
+import { EmptyArt, ThemeHero } from "../../components/Decor";
 import { LocationPicker } from "../../components/LocationPicker";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, newKey, setCsrf } from "../../api";
 import { Banner, Button, ErrorText, Field, Input, Loading, Select, Textarea, useAction } from "../../components/ui";
 import { EVENT_STATUS_LABEL, fmtDateTime, PICKUP_LABEL } from "../../format";
-import { useFetch } from "../../hooks";
+import { useFetch, useEventTheme } from "../../hooks";
 import { useAccessMe } from "../../session";
 
 export interface PublicEvent {
@@ -12,21 +13,18 @@ export interface PublicEvent {
   registrationStart: string; registrationClose: string; modificationDeadline: string; plannedStart: string; plannedEnd: string; organizerContact: string; locality?: string;
 }
 
-function useTheme(type?: string) {
-  useEffect(() => { document.documentElement.dataset.theme = type ?? "halloween"; }, [type]);
-}
+const useTheme = useEventTheme;
 
 export function Home() {
   const { me } = useAccessMe();
   const events = useFetch<PublicEvent[]>("/api/public/events");
-  useTheme();
+  useTheme(events.data?.[0]?.type);
   return (
     <div className="page">
-      <h1>Kincsvadászat</h1>
-      <p className="muted">Szezonális közösségi esemény: csapatok járják a település állomásait.</p>
+      <ThemeHero type={events.data?.[0]?.type ?? "halloween"} title="Kincsvadászat" subtitle="Szezonális közösségi esemény: csapatok járják a település állomásait." />
       {me && <Banner kind="info" title="Be vagy jelentkezve"><Link to={me.role === "team" ? "/csapat" : "/host"}>Tovább az alkalmazásba</Link></Banner>}
       {events.loading && <Loading />}
-      {events.data?.length === 0 && <Banner kind="info" title="Jelenleg nincs meghirdetett esemény" />}
+      {events.data?.length === 0 && <><EmptyArt /><Banner kind="info" title="Jelenleg nincs meghirdetett esemény" /></>}
       {events.data?.map((e) => (
         <div className="card" key={e.id}>
           <h2 style={{ marginTop: 0 }}>{e.name}</h2>
@@ -55,8 +53,7 @@ export function EventPage() {
   const open = e.status === "registration_open" && now >= new Date(e.registrationStart).getTime() && now <= new Date(e.registrationClose).getTime();
   return (
     <div className="page">
-      <h1>{e.name}</h1>
-      <p>{e.shortDescription}</p>
+      <ThemeHero type={e.type} title={e.name} subtitle={e.shortDescription} />
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Időpontok</h2>
         <table className="t"><tbody>
@@ -91,7 +88,7 @@ export function EventPage() {
 }
 
 function Done({ title, children }: { title: string; children: React.ReactNode }) {
-  return <div className="page"><Banner kind="ok" title={title}>{children}</Banner><Link className="btn" to="/">Főoldal</Link></div>;
+  return <div className="page"><EmptyArt /><Banner kind="ok" title={title}>{children}</Banner><Link className="btn" to="/">Főoldal</Link></div>;
 }
 
 export function TeamApply() {

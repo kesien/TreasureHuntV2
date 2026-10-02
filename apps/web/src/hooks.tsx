@@ -93,6 +93,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Az esemény típusa szerinti téma (data-theme) és a böngésző címsorának színe; egyetlen helyen kezelve. */
+const THEME_COLOR = { halloween: "#120d1f", easter: "#f6fbef" } as const;
+export function useEventTheme(type?: "halloween" | "easter" | string | null) {
+  const t = type === "easter" ? "easter" : "halloween";
+  useEffect(() => {
+    document.documentElement.dataset.theme = t;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLOR[t]);
+  }, [t]);
+  return t;
+}
+
 /** Ismétlődő frissítés (pl. időzítő). */
 export function useTick(ms = 1000): number {
   const [n, setN] = useState(Date.now());

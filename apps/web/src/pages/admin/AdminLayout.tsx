@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { api, setCsrf } from "../../api";
 import { EVENT_STATUS_LABEL } from "../../format";
-import { useFetch, useLive } from "../../hooks";
+import { useEventTheme, useFetch, useLive } from "../../hooks";
 import { Loading } from "../../components/ui";
 import { useAdminMe } from "../../session";
 
@@ -27,9 +27,9 @@ export function AdminLayout() {
   const list = useFetch<AdminEvent[]>("/api/admin/events");
   useLive("/api/admin/stream", list.reload);
   const [sel, setSel] = useState<string | null>(() => { try { return localStorage.getItem("th_admin_event"); } catch { return null; } });
-  useEffect(() => { document.documentElement.dataset.theme = "halloween"; }, []);
   const events = list.data ?? [];
   const current = events.find((e) => e.id === sel) ?? events.find((e) => e.status === "active") ?? events[0] ?? null;
+  useEventTheme(current?.type);
   const select = (id: string) => { setSel(id); try { localStorage.setItem("th_admin_event", id); } catch { /* */ } };
 
   async function logout() { await api("/api/admin/logout", { method: "POST" }).catch(() => undefined); setCsrf(null); await refresh(); nav("/admin/belepes"); }

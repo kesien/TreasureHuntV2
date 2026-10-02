@@ -44,6 +44,10 @@ Self-hosted, mobil-first PWA egy kisvárosi, szezonális közösségi eseményhe
 
 Nem használtunk: Redis, Kubernetes, Grafana/Prometheus, push infrastruktúra (a spec szerint nem MVP). A térkép és a geokódolás Google Maps Platform (kulcs + havi plafon + költségkeret az üzemeltetőnél).
 
+## Megjelenés és témák
+
+Az esemény típusa (`halloween` | `easter`) választja a témát (`data-theme` a `<html>`-en, egyetlen `useEventTheme` hook állítja; csapatnál/hostnál az `/api/access/me` `eventType` mezőjéből, adminnál a kiválasztott eseményből). A Halloween téma mindig sötét „éjszakai" (tök-narancs + lila), a Húsvét világos pasztell (sötét eszközmódban sötét változat). A címsorbetűk önhosztoltak (Pirata One, Baloo 2; mindkettő tud ő/ű-t – új betű választásakor ezt ellenőrizni kell), a díszek beágyazott SVG-k (`components/Decor.tsx`), a használati oldalak (állomások, admin) díszítés nélküliek. A színpárok kontrasztját `apps/web/src/theme.test.ts` őrzi (AA).
+
 ## Szerepkörök és hozzáférés
 
 - **Csapat / host**: egyedi hozzáférési link (256 bites véletlen token, csak SHA-256 hash-e tárolt) + 6 számjegyű PIN (argon2id). Eszközönként külön munkamenet (HttpOnly, Secure, SameSite=Lax süti + CSRF token). Kijelentkezés csak az adott eszközt érinti. **PIN-csere / helyreállítás minden munkamenetet megszüntet**; **link-újragenerálás** csak a régi linket érvényteleníti. Hibás PIN-re zárolás és IP-alapú rate limit.

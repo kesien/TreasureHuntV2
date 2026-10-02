@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import { PhotoGallery } from "../../components/Photos";
+import { BrandMark, TAB_ICONS } from "../../components/Decor";
 import { LocationPicker } from "../../components/LocationPicker";
 import { Badge, Banner, Button, ErrorText, Field, Input, Loading, Select, Textarea, useAction, useConfirm } from "../../components/ui";
 import { api, setCsrf } from "../../api";
 import { fmtDateTime, fmtTime, PICKUP_LABEL } from "../../format";
-import { useFetch, useLive, useToast } from "../../hooks";
+import { useEventTheme, useFetch, useLive, useToast } from "../../hooks";
 import { useAccessMe } from "../../session";
 import { GuidePage } from "../Guide";
 import { PinChange } from "../PinChange";
@@ -20,7 +21,9 @@ interface Dashboard {
 }
 
 export function HostApp() {
-  useEffect(() => { document.documentElement.dataset.theme = "halloween"; }, []);
+  const { me } = useAccessMe();
+  const theme = useEventTheme(me?.eventType);
+  const tabIcons = TAB_ICONS[theme];
   return (
     <>
       <Routes>
@@ -29,15 +32,16 @@ export function HostApp() {
         <Route path="utmutato" element={<GuidePage />} />
       </Routes>
       <nav className="tabbar" aria-label="Fő navigáció">
-        <NavLink to="/host" end><span className="ico" aria-hidden>🏠</span>Állomásom</NavLink>
-        <NavLink to="/host/profil"><span className="ico" aria-hidden>⚙️</span>Adataim</NavLink>
-        <NavLink to="/host/utmutato"><span className="ico" aria-hidden>❓</span>Útmutató</NavLink>
+        <NavLink to="/host" end><span className="ico" aria-hidden>{tabIcons.main}</span>Állomásom</NavLink>
+        <NavLink to="/host/profil"><span className="ico" aria-hidden>{tabIcons.people}</span>Adataim</NavLink>
+        <NavLink to="/host/utmutato"><span className="ico" aria-hidden>{tabIcons.guide}</span>Útmutató</NavLink>
       </nav>
     </>
   );
 }
 
 function HostHome() {
+  const { me } = useAccessMe();
   const d = useFetch<Dashboard>("/api/access/host/dashboard", { cacheKey: "host-dashboard" });
   const live = useLive("/api/access/stream", d.reload);
   const act = useAction();
@@ -51,7 +55,7 @@ function HostHome() {
 
   return (
     <>
-      <header className="topbar"><b>{x.event.name}</b><span className="muted" aria-live="polite">{live ? "Élő" : "Frissítés…"}</span></header>
+      <header className="topbar"><span className="brand"><BrandMark type={me?.eventType} />{x.event.name}</span><span className="muted" aria-live="polite">{live ? "Élő" : "Frissítés…"}</span></header>
       <div className="page">
         {d.offline && <Banner kind="warn" title="Nincs kapcsolat">A legutóbb betöltött adatokat látod.</Banner>}
         <p className="muted">{fmtDateTime(x.event.plannedStart)} – {fmtTime(x.event.plannedEnd)} · <Badge kind="info">{({ draft: "Tervezés", registration_open: "Jelentkezés nyitva", preparation: "Előkészítés", active: "Folyamatban", closed: "Lezárva", cancelled: "Elmarad" } as Record<string, string>)[x.event.status]}</Badge></p>

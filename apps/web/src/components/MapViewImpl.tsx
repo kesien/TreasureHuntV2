@@ -39,6 +39,8 @@ export function MapView({ markers, onMarkerClick, draggable, onDrag, height, cen
       const c = centerRef.current;
       map.current = new maps.Map(el.current, {
         center: c ? { lat: c.lat, lng: c.lon } : FALLBACK_CENTER, zoom: 14, mapId,
+        // A Halloween téma sötét; a sötét séma csak vektoros map ID-val érvényesül (raster ID-nál a térkép világos marad)
+        colorScheme: document.documentElement.dataset.theme === "halloween" ? google.maps.ColorScheme.DARK : google.maps.ColorScheme.LIGHT,
         disableDefaultUI: true, zoomControl: true, fullscreenControl: false, clickableIcons: false, gestureHandling: "greedy",
       });
       info.current = new maps.InfoWindow();

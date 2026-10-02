@@ -141,7 +141,9 @@ describe("team/host hozzáférés", () => {
     const out = await ctx.app.inject({ method: "POST", url: "/api/access/logout", headers: { cookie: ca, "x-csrf-token": a.json().csrfToken } });
     expect(out.statusCode).toBe(200);
     expect((await ctx.app.inject({ method: "GET", url: "/api/access/me", headers: { cookie: ca } })).statusCode).toBe(401);
-    expect((await ctx.app.inject({ method: "GET", url: "/api/access/me", headers: { cookie: cb } })).statusCode).toBe(200);
+    const me = await ctx.app.inject({ method: "GET", url: "/api/access/me", headers: { cookie: cb } });
+    expect(me.statusCode).toBe(200);
+    expect(me.json().eventType).toMatch(/^(halloween|easter)$/); // a kliens téma az esemény típusából jön
     expect((await ctx.db.select().from(accessSessions)).length).toBe(1);
   });
 

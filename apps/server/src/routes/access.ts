@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { events } from "../db/schema.js";
 import { ACCESS_COOKIE, cookieOpts, type RouteCtx } from "../app.js";
 import { accessLogin, accessLogout, changePin } from "../services/accessAuth.js";
 
@@ -14,7 +16,8 @@ export async function registerAccessRoutes(app: FastifyInstance, { db, secure }:
 
   app.get("/api/access/me", async (req, reply) => {
     if (!req.access) return reply.code(401).send({ error: "unauthorized", message: "Jelentkezz be." });
-    return { role: req.access.subjectType, csrfToken: req.access.csrfToken };
+    const [ev] = await db.select({ type: events.type }).from(events).where(eq(events.id, req.access.eventId));
+    return { role: req.access.subjectType, csrfToken: req.access.csrfToken, eventType: (ev?.type ?? "halloween") as "halloween" | "easter" };
   });
 
   // Csak az aktuális eszköz kilép

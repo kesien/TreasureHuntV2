@@ -4,7 +4,7 @@ import { ApiError, api, isNetworkError, setCsrf } from "./api";
 import { getMeta, setMeta } from "./offline/db";
 import { Loading } from "./components/ui";
 
-export interface AccessMe { role: "team" | "host"; csrfToken: string }
+export interface AccessMe { role: "team" | "host"; csrfToken: string; eventType?: "halloween" | "easter" }
 export interface AdminMe { id: string; email: string; displayName: string; csrfToken: string }
 
 interface Ctx<T> { me: T | null; loading: boolean; refresh: () => Promise<void> }

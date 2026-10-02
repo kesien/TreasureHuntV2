@@ -15,8 +15,8 @@ export default defineConfig({
         start_url: "/",
         scope: "/",
         display: "standalone",
-        background_color: "#1c1917",
-        theme_color: "#c2410c",
+        background_color: "#120d1f",
+        theme_color: "#120d1f",
         icons: [
           { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
@@ -24,6 +24,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        globPatterns: ["**/*.{js,css,html,woff2,svg,png}"], // a betűk is előtöltődnek: offline is a téma szerinti megjelenés
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//],
         // Az API válaszait a szolgáltatás nem gyorsítótárazza (a kliens saját pillanatképet tart IndexedDB-ben).

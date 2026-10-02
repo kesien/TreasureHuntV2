@@ -116,6 +116,7 @@ test("teljes folyamat: admin → jelentkezés → jóváhagyás → check-in (on
   await team.getByLabel(/PIN/).fill(pin);
   await team.getByRole("button", { name: "Belépés" }).click();
   await expect(team.getByText("Összes")).toBeVisible();
+  await expect(team.locator("html")).toHaveAttribute("data-theme", "halloween"); // az esemény típusa szerinti téma
   await expect(team.getByText("0/2")).toBeVisible();
   await expect(team.locator("body")).not.toContainText("Nagy Béla"); // a host neve sosem látszik
 

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
+import { BrandMark, TAB_ICONS } from "../../components/Decor";
 import { MapView, type Marker } from "../../components/MapView";
+import { useAccessMe } from "../../session";
 import { RoutePlanner } from "../../components/RoutePlanner";
 import { PhotoGallery } from "../../components/Photos";
 import { SyncBanner } from "../../components/SyncBanner";
@@ -8,7 +10,7 @@ import { Badge, Banner, Button, ErrorText, Loading, Sheet, useAction } from "../
 import { ApiError, api, isNetworkError } from "../../api";
 import { fmtDateTime, fmtDuration, PICKUP_LABEL } from "../../format";
 import { GpsError, getPosition, navigationUrl } from "../../geo";
-import { useFetch, useLive, useOnline, useTick, useToast } from "../../hooks";
+import { useEventTheme, useFetch, useLive, useOnline, useTick, useToast } from "../../hooks";
 import { StorageFullError } from "../../offline/db";
 import { dismissNotice, enqueueCheckIn, localProximity, reasonText, useQueue } from "../../offline/queue";
 import { GpsHelp, GuidePage } from "../Guide";
@@ -27,7 +29,9 @@ export interface TeamInfo {
 
 export function TeamApp() {
   const team = useFetch<TeamInfo>("/api/access/team", { cacheKey: "team" });
-  useEffect(() => { document.documentElement.dataset.theme = "halloween"; }, []);
+  const { me } = useAccessMe();
+  const theme = useEventTheme(me?.eventType);
+  const tabIcons = TAB_ICONS[theme];
   return (
     <>
       <Routes>
@@ -36,9 +40,9 @@ export function TeamApp() {
         <Route path="utmutato" element={<GuidePage />} />
       </Routes>
       <nav className="tabbar" aria-label="Fő navigáció">
-        <NavLink to="/csapat" end><span className="ico" aria-hidden>📍</span>Állomások</NavLink>
-        <NavLink to="/csapat/profil"><span className="ico" aria-hidden>👥</span>Csapat</NavLink>
-        <NavLink to="/csapat/utmutato"><span className="ico" aria-hidden>❓</span>Útmutató</NavLink>
+        <NavLink to="/csapat" end><span className="ico" aria-hidden>{tabIcons.main}</span>Állomások</NavLink>
+        <NavLink to="/csapat/profil"><span className="ico" aria-hidden>{tabIcons.people}</span>Csapat</NavLink>
+        <NavLink to="/csapat/utmutato"><span className="ico" aria-hidden>{tabIcons.guide}</span>Útmutató</NavLink>
       </nav>
     </>
   );
@@ -49,6 +53,7 @@ type Filter = "all" | "todo" | "done" | "out";
 function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () => void }) {
   const stationsQ = useFetch<StationsResp>("/api/access/stations", { cacheKey: "stations" });
   const progressQ = useFetch<Progress>("/api/access/progress", { cacheKey: "progress" });
+  const { me } = useAccessMe();
   const q = useQueue();
   const online = useOnline();
   const [mode, setMode] = useState<"list" | "map">("map");
@@ -82,7 +87,7 @@ function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () 
   return (
     <>
       <header className="topbar">
-        <b>{team?.event.name ?? "Kincsvadászat"}</b>
+        <span className="brand"><BrandMark type={me?.eventType} />{team?.event.name ?? "Kincsvadászat"}</span>
         <span className="muted" aria-live="polite">{live || !online ? (online ? "Élő" : "Offline") : "Frissítés…"}</span>
       </header>
       <div className="page">
@@ -126,11 +131,11 @@ function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () 
                   <li key={s.id}>
                     <button type="button" className="item" onClick={() => setSelected(s.id)}>
                       <span className={`num ${s.done ? "done" : s.likelyOut || s.giftStatus === "depleted" ? "out" : ""}`} aria-hidden>{s.done ? "✓" : s.number}</span>
-                      <span style={{ flex: 1 }}>
+                      <span style={{ flex: "1 1 9rem" }}>
                         <b>{s.label}</b><br />
                         <span className="muted">{s.address}</span>
                       </span>
-                      <span>
+                      <span className="badges">
                         {s.pending && <Badge kind="warn">Szinkronra vár</Badge>}
                         {s.done && !s.pending && <Badge kind="ok">Teljesítve</Badge>}
                         {s.giftStatus === "depleted" && <Badge kind="danger">Elfogyott</Badge>}
