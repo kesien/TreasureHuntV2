@@ -49,6 +49,7 @@ export function GuidePage() {
         <li><b>Jóváhagyás</b> – a szervezők elbírálják; jóváhagyás után e-mailben érkezik a belépési link és a PIN.</li>
         <li><b>Belépés</b> – nyisd meg a linket, add meg a PIN-t. Ugyanazzal több telefonról is beléphetsz; a kilépés csak az adott telefont érinti.</li>
         <li><b>Helyszínek</b> – az esemény előtt 24 órával jelennek meg az állomások (Állomás #N).</li>
+        <li><b>Térkép és útvonal</b> – az állomások alapból térképen látszanak; a jelölőre koppintva megjelenik a „Részletek” gomb. Az „Útvonal a hátralévő állomásokra” gomb gyalogos útvonal-javaslatot ad (csak javaslat). Offline a térkép nem érhető el, ott a lista működik.</li>
         <li><b>Navigáció</b> – az állomás lapján a „Navigáció” gomb a telefonod térképalkalmazását nyitja meg.</li>
         <li><b>GPS engedély</b> – a „Megérkeztünk” gombhoz engedélyezd a helyadatokat (lásd lent).</li>
         <li><b>Megérkeztünk</b> – az állomás közelében koppints rá; a rendszer ellenőrzi, hogy a közelben vagytok-e.</li>

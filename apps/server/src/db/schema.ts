@@ -126,6 +126,7 @@ export const hosts = pgTable("hosts", {
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
   locationConfirmed: boolean("location_confirmed").notNull().default(false),
+  placeId: text("place_id"), // Google place ID (a Google feltételei szerint ez tárolható)
   pickupMode: text("pickup_mode").notNull(), // gift_outside | ring_bell
   participantNote: text("participant_note"),
   status: text("status").notNull().default("pending"),

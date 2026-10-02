@@ -26,14 +26,8 @@ export default defineConfig({
       workbox: {
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//],
-        // Az API válaszait a szolgáltatás nem gyorsítótárazza (a kliens saját pillanatképet tart IndexedDB-ben)
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) => /tile/.test(url.hostname) || /\/\d+\/\d+\/\d+\.(png|pbf)$/.test(url.pathname),
-            handler: "StaleWhileRevalidate",
-            options: { cacheName: "map-tiles", expiration: { maxEntries: 200, maxAgeSeconds: 7 * 24 * 3600 } },
-          },
-        ],
+        // Az API válaszait a szolgáltatás nem gyorsítótárazza (a kliens saját pillanatképet tart IndexedDB-ben).
+        // A Google Maps csempéit sem: a feltételeik nem engedik a gyorsítótárazást, offline a lista a tartalék.
       },
     }),
   ],

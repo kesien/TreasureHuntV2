@@ -166,7 +166,7 @@ function HostProfile() {
         <div className="card">
           <h2 style={{ marginTop: 0 }}>Állomás pozíciója</h2>
           {h.locationConfirmed ? <p><Badge kind="ok">Megerősítve</Badge></p> : <Banner kind="warn" title="A pozíció még nincs megerősítve">Keresd meg a címet, szükség esetén húzd a jelölőt a pontos helyre, majd erősítsd meg.</Banner>}
-          <LocationPicker address={f.address} onConfirm={async (lat, lon) => { await api("/api/access/host/location", { method: "PUT", body: { lat, lon } }); await load(); }} />
+          <LocationPicker address={f.address} onConfirm={async (lat, lon, placeId) => { await api("/api/access/host/location", { method: "PUT", body: { lat, lon, placeId } }); await load(); }} />
         </div>
       )}
 

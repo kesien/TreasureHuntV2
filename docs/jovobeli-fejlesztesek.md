@@ -5,7 +5,7 @@
 ## Üzemeltetés és megbízhatóság
 
 - **Folyamatos mentés** (WAL-archiválás / pgBackRest) és automatikus, ütemezett restore-teszt riasztással.
-- **Saját csempeszerver és geokódoló** (pl. Protomaps/OpenMapTiles + Nominatim/Photon) a publikus OSM-szolgáltatások helyett; offline térkép-csomag előtöltése az eseményterületre.
+- **Routes API** a (legacy) DirectionsService helyett; saját/alternatív geokódoló (pl. hazai címadatbázis), ha a Google feltételek vagy költség nem megfelelő.
 - **Egyszerű metrika-végpont** és külső uptime-figyelés (nem Grafana/Prometheus, csak egy health + riasztás e-mailben).
 - **Több példányos SSE** (Postgres `LISTEN/NOTIFY`) ha valaha több app-példány kellene.
 - **Titokkezelés**: Docker secrets / külső titokkezelő az `.env` helyett.
@@ -13,7 +13,7 @@
 ## Résztvevői élmény
 
 - **Web Push értesítés** (T−24, elfogyott ajándék) – a spec szerint MVP-ben nincs; iOS-en csak telepített PWA-val működik.
-- **Jobb offline térkép** (csempék előtöltése a jóváhagyott állomások környékére T−24 után).
+- **Offline térkép**: a Google Maps nem cache-elhető; offline térképhez más csempeszolgáltató kellene (jelenleg offline a lista a tartalék).
 - **Fotók kliensoldali HEIC→JPEG átalakítása** (ha a böngésző támogatja), hogy offline kevesebb helyet foglaljon.
 - **Telepítési felszólítás** (add-to-homescreen javaslat) iOS/Android útmutatóval.
 - **Többnyelvűség** (angol/német) turisták vagy vendégek számára.

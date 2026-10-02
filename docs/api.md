@@ -108,6 +108,7 @@
 | POST | `/api/public/email-change/confirm` | nyilvános | applications.ts |
 | GET | `/api/public/events` | nyilvános | applications.ts |
 | GET | `/api/public/events/:id` | nyilvános | applications.ts |
+| POST | `/api/public/events/:id/geocode` | nyilvános | stations.ts |
 | POST | `/api/public/events/:id/hosts` | nyilvános | applications.ts |
 | POST | `/api/public/events/:id/teams` | nyilvános | applications.ts |
 | POST | `/api/public/pin-recovery/complete` | nyilvános | applications.ts |

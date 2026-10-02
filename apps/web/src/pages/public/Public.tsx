@@ -1,3 +1,4 @@
+import { LocationPicker } from "../../components/LocationPicker";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, newKey, setCsrf } from "../../api";
@@ -146,16 +147,24 @@ export function HostApply() {
   const [f, setF] = useState({ contactName: "", email: "", phone: "", address: "", pickupMode: "gift_outside", participantNote: "" });
   const [consent, setConsent] = useState(false);
   const [done, setDone] = useState(false);
+  const [loc, setLoc] = useState<{ lat: number; lon: number; placeId?: string } | null>(null);
+  const [skipLoc, setSkipLoc] = useState(false);
   const a = useAction();
-  if (done) return <Done title="Köszönjük a jelentkezést!">Az állomás-jelentkezésed Függőben állapotú. A szervezők megerősítik a címed térképes pozícióját, majd jóváhagyás után e-mailben küldjük a belépési linket és a PIN-t. A neved a csapatok számára nem látható; az állomásod „Állomás #N” néven jelenik meg.</Done>;
+  if (done) return <Done title="Köszönjük a jelentkezést!">Az állomás-jelentkezésed Függőben állapotú. A szervezők jóváhagyása után e-mailben küldjük a belépési linket és a PIN-t. A neved a csapatok számára nem látható; az állomásod „Állomás #N” néven jelenik meg.</Done>;
   return (
-    <form className="page" onSubmit={(e) => { e.preventDefault(); void a.run(async () => { await api(`/api/public/events/${id}/hosts`, { body: { ...f, participantNote: f.participantNote || undefined, consent }, headers: { "Idempotency-Key": key.current } }); setDone(true); }); }}>
+    <form className="page" onSubmit={(e) => { e.preventDefault(); void a.run(async () => { await api(`/api/public/events/${id}/hosts`, { body: { ...f, participantNote: f.participantNote || undefined, consent, location: loc ?? undefined }, headers: { "Idempotency-Key": key.current } }); setDone(true); }); }}>
       <h1>Házigazda (állomás) jelentkezés</h1>
       <p className="muted">{ev.data?.name}</p>
       <Field label="Kapcsolattartó neve"><Input required value={f.contactName} onChange={(e) => setF({ ...f, contactName: e.target.value })} autoComplete="name" /></Field>
       <Field label="E-mail cím"><Input required type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} autoComplete="email" /></Field>
       <Field label="Telefonszám" hint="Pl. +36 30 123 4567"><Input required type="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} autoComplete="tel" /></Field>
-      <Field label="Az állomás címe" hint="Irányítószám, település, utca, házszám"><Input required value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} minLength={5} autoComplete="street-address" /></Field>
+      <Field label="Az állomás címe" hint="Irányítószám, település, utca, házszám"><Input required value={f.address} onChange={(e) => { setF({ ...f, address: e.target.value }); setLoc(null); }} minLength={5} autoComplete="street-address" /></Field>
+      <h2>Az állomás pozíciója</h2>
+      <p className="muted">Keresd meg a címed a térképen, és ha kell, húzd a jelölőt pontosan a házra. Ezt te tudod a legjobban: a megerősített pozíciót használjuk az állomás helyeként.</p>
+      {id && <LocationPicker address={f.address} publicEventId={id} confirmLabel="Ez az én házam – pozíció megerősítése" onConfirm={async (lat, lon, placeId) => { setLoc({ lat, lon, placeId }); setSkipLoc(false); }} />}
+      {loc ? <Banner kind="ok" title="Pozíció megerősítve">A jelentkezéssel együtt elküldjük.</Banner> : (
+        <label className="check"><input type="checkbox" checked={skipLoc} onChange={(e) => setSkipLoc(e.target.checked)} /> Nem sikerült a térképen megadni – pozíció nélkül küldöm el, a szervezők egyeztetnek velem.</label>
+      )}
       <Field label="Hogyan adod át az ajándékot?">
         <Select value={f.pickupMode} onChange={(e) => setF({ ...f, pickupMode: e.target.value })}>
           {Object.entries(PICKUP_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -164,7 +173,8 @@ export function HostApply() {
       <Field label="Megjegyzés a résztvevőknek (nem kötelező)"><Textarea value={f.participantNote} onChange={(e) => setF({ ...f, participantNote: e.target.value })} maxLength={500} /></Field>
       <label className="check"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} /> Elfogadom az adatkezelési tájékoztatót és a szabályzatot.</label>
       <ErrorText error={a.error} />
-      <Button type="submit" block disabled={a.busy || !consent}>{a.busy ? "Küldés…" : "Jelentkezés elküldése"}</Button>
+      <Button type="submit" block disabled={a.busy || !consent || (!loc && !skipLoc)}>{a.busy ? "Küldés…" : "Jelentkezés elküldése"}</Button>
+      {!loc && !skipLoc && <p className="muted">A küldéshez erősítsd meg a pozíciót a térképen.</p>}
     </form>
   );
 }

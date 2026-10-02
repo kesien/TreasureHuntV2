@@ -72,10 +72,19 @@ A parancs kiírja a 72 óráig érvényes, egyszer használható aktivációs li
 
 Admin felület → Beállítások → e-mail (SMTP): szerver, port, TLS/SSL, felhasználó, jelszó, feladó neve és címe. Tesztelés: hívj meg egy második admint (a meghívó levél az Értesítések oldalon követhető), vagy küldj teszt-jelentkezést. Hibás SMTP esetén a levelek a sorban maradnak, és újrapróbálódnak; a hibaok az Értesítések oldalon látszik.
 
-## 6. Térkép és geokódolás
+## 6. Térkép, geokódolás és útvonal (Google Maps Platform)
 
-- Alapértelmezetten a publikus OpenStreetMap csempeszerver és a Nominatim geokódoló van beállítva. Ezek használati szabályzata (azonosító User-Agent, cache, mérsékelt forgalom, forrásmegjelölés) teljesül, de **nem korlátlan éles szolgáltatások**. Kb. 100–120 résztvevőnél elegendők; nagyobb forgalomhoz állíts be saját vagy kereskedelmi csempeszolgáltatót (`TILE_URL`, `TILE_ATTRIBUTION`).
-- A geokódolás a szerveren fut (cache-sel és rate limittel); a böngésző sosem hív geokódolót. A szolgáltató a `GeocoderProvider` interfész mögött cserélhető.
+1. Hozz létre Google Cloud projektet, kapcsold be a számlázást, és **állíts be költségkeretet és riasztást** (Billing → Budgets & alerts).
+2. Engedélyezd az API-kat: **Maps JavaScript API**, **Geocoding API**, **Directions API** (utóbbi legacy lehet új projekteknél; ha nem engedélyezhető, az útvonal-funkció nem működik, a többi igen).
+3. Hozz létre **két API-kulcsot**:
+   - *Böngészőkulcs* (`GOOGLE_MAPS_API_KEY`): Application restriction = HTTP referrers (`https://kincs.pelda.hu/*`), API restriction = Maps JavaScript API + Directions API. Ez publikus a kliensben, ezért a korlátozás kötelező.
+   - *Szerverkulcs* (`GOOGLE_GEOCODING_API_KEY`): Application restriction = IP addresses (a szervered kimenő IP-je), API restriction = Geocoding API. Ez nem kerül a kliensnek.
+4. Hozz létre **Map ID**-t (Map Management, JavaScript, Vector vagy Raster) és add meg `GOOGLE_MAPS_MAP_ID`-ként (a haladó markerekhez kötelező).
+5. Állítsd be a `GOOGLE_GEOCODING_MONTHLY_LIMIT`-et (alap 1000) az ingyenes keret alá. Egy cím csak egyszer geokódolódik (cache), 100–120 résztvevőnél egy esemény pár száz hívás. A plafon elérése után a Nominatim (OSM) tartalék működik; a Rendszerállapot oldalon látod a havi használatot.
+6. Az esemény létrehozásakor add meg a **települést** (pl. Derekegyháza): a címkeresés ezt hozzáfűzi, így elég az utca és házszám.
+7. A térkép **nem** működik offline; ilyenkor a csapatnézet a listára vált, a check-in offline sor érintetlen.
+
+A kulcsok nélkül az alkalmazás működik, de térkép nincs (a hostok pozíció nélkül jelentkezhetnek, az admin pedig csak kulcs után tudja megerősíteni a pozíciókat).
 
 ## 7. Frissítés
 

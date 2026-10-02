@@ -8,6 +8,7 @@ import {
 import { audit } from "./audit.js";
 import { AppError } from "./applications.js";
 import { lastBackups } from "./backup.js";
+import { googleUsage } from "./googleQuota.js";
 import { currentCycle, isLikelyOut, reportCount } from "./gifts.js";
 
 /** Esemény statisztika (ranglista nélkül). Csak a jóváhagyott csapatok számítanak a résztvevői létszámba. */
@@ -110,6 +111,13 @@ export async function systemStatus(db: Db, cfg: Config, now = new Date()) {
 
     const [errs] = await db.select({ n: sql<number>`count(*)::int` }).from(errorEvents).where(gte(errorEvents.at, new Date(now.getTime() - 24 * 3600_000)));
     checks.errors = (errs?.n ?? 0) > 0 ? { level: "warning", detail: `${errs!.n} kritikus hiba az elmúlt 24 órában` } : { level: "ok", detail: "Nincs" };
+  }
+  if (cfg.GOOGLE_GEOCODING_API_KEY && checks.database!.level === "ok") {
+    const u = await googleUsage(db, now);
+    const lim = cfg.GOOGLE_GEOCODING_MONTHLY_LIMIT;
+    checks.geocoding = u.count >= lim ? { level: "warning", detail: `A havi Google geokódolási plafon (${lim}) elérve; a Nominatim tartalék működik` }
+      : u.count >= lim * 0.8 ? { level: "warning", detail: `Google geokódolás: ${u.count}/${lim} a hónapban` }
+      : { level: "ok", detail: `Google geokódolás: ${u.count}/${lim} a hónapban` };
   }
   const levels = Object.values(checks).map((c) => c.level);
   const overall: Level = levels.includes("error") ? "error" : levels.includes("warning") ? "warning" : "ok";

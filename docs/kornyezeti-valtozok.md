@@ -14,8 +14,10 @@ A konfiguráció környezeti változókból jön (`apps/server/src/config.ts`, z
 | `BACKUP_DIR` | nem | `./data/backups` (konténerben `/data/backups`) | Mentések célkönyvtára; bármilyen mountolt tárhely (NAS, külső lemez, szinkronizált mappa). |
 | `BACKUP_DAILY_RETENTION_DAYS` | nem | `7` | Napi/kézi mentések megőrzése napokban (legalább 7). |
 | `BACKUP_SNAPSHOT_RETENTION_DAYS` | nem | `730` | Esemény-pillanatképek megőrzése napokban (legalább 30). |
-| `TILE_URL` | nem | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` | Térképcsempe-szolgáltató (`{s}` aldomén is használható). A CSP automatikusan követi. A publikus OSM csempeszerver használati szabályzata korlátozott éles használatot enged; nagyobb forgalomhoz saját vagy kereskedelmi csempeszolgáltatóra érdemes váltani. |
-| `TILE_ATTRIBUTION` | nem | `© OpenStreetMap közreműködők` | A térképen megjelenő forrásmegjelölés (szolgáltatóváltáskor igazítsd). |
+| `GOOGLE_MAPS_API_KEY` | térképhez | – | Maps JavaScript API böngészőkulcs (publikus: a `/api/public/config` adja a kliensnek). **Kötelezően korlátozd HTTP referrer szerint** a saját domainedre, és csak a szükséges API-kat engedélyezd (Maps JavaScript, Directions). Kulcs nélkül a térkép nem jelenik meg (a csapatnézet listára vált). |
+| `GOOGLE_MAPS_MAP_ID` | nem | `DEMO_MAP_ID` | A haladó markerekhez (AdvancedMarkerElement) kötelező map ID; éles használatra hozz létre sajátot a Cloud Console-ban. |
+| `GOOGLE_GEOCODING_API_KEY` | nem | – | Geocoding API szerverkulcs, **IP-cím szerint korlátozva**. Üresen a Nominatim (OSM) a geokódoló. |
+| `GOOGLE_GEOCODING_MONTHLY_LIMIT` | nem | `1000` | Havi plafon a Google geokódolási hívásokra (UTC naptári hónap). Elérése után automatikusan a Nominatim tartalék működik; a Rendszerállapot oldal 80%-nál figyelmeztet. Állítsd az ingyenes keret alá, és a Cloud Console-ban állíts be költségkeretet és riasztást is. |
 | `WEB_DIST` | nem | `../web/dist` | A lefordított kliens helye a szerver munkakönyvtárához képest. |
 | `APP_VERSION` | nem | `0.1.0` | A rendszerállapot oldalon megjelenő verzió. |
 | `LOG_LEVEL` | nem | `info` | `trace` … `fatal`. |

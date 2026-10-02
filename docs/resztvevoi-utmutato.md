@@ -8,19 +8,20 @@ Ugyanez a tartalom az alkalmazásban is elérhető (Útmutató fül). Magyar nye
 2. **Jóváhagyás** – a szervezők elbírálják. Jóváhagyáskor e-mailben megkapod a **belépési linket** és a **6 számjegyű PIN-t**; elutasításkor az indoklást.
 3. **Belépés** – nyisd meg a linket, add meg a PIN-t. Ugyanazzal a hozzáféréssel több telefonról is beléphetsz; mindegyik külön megjegyzi a belépést. A kijelentkezés csak az adott telefont érinti. A PIN-t ne oszd meg külső személlyel.
 4. **Helyszínek** – az esemény előtt 24 órával jelennek meg az állomások („Állomás #N"). Addig csak az állomások száma látszik. Erről e-mailt is kapsz.
-5. **Navigáció** – az állomás lapján a „Navigáció" gomb a telefonod alapértelmezett térkép-/navigációs alkalmazását nyitja meg (gyalog és autóval is).
-6. **GPS engedély** – a „Megérkeztünk" gombhoz engedélyezd a helyadatokat az oldalnak (lásd lent).
-7. **Megérkeztünk** – az állomás közelében (alapból 120 méteren belül) koppints a gombra. A szerver ellenőrzi a távolságot; siker esetén nincs külön felugró ablak, az állomás „Teljesítve" lesz. Egy állomásra egyszer lehet becsekkolni.
-8. **Játékidő** – az első sikeres becsekkolásnál indul, és mutatja a haladást (pl. 5/18). Ha minden állomást teljesítettetek, megáll. Nincs ranglista, nincs verseny.
-9. **Fotó** – becsekkolás után állomásonként legfeljebb **5 fotót** tölthettek fel (JPEG, PNG, WebP, HEIC; max. 20 MB/fotó). A fotókból a helyadat és a metaadat törlődik. A fotók anonimak (nem látszik, melyik csapat töltötte fel). A saját fotót bármikor törölheted. Bármely fotó jelenthető („Fotó jelentése"): azonnal elrejtjük, az adminisztrátor elbírálja.
+5. **Térkép és útvonal** – az állomások alapból térképen látszanak (a Lista gombbal listanézetre válthatsz); a jelölőre koppintva megjelenik az állomás neve és a „Részletek” gomb. Az „Útvonal a hátralévő állomásokra” gomb a telefonod pozíciójától gyalogos útvonal-javaslatot ad a még nem teljesített állomásokra; ez csak javaslat, tetszőleges sorrendben járhatjátok be. Offline a térkép nem érhető el, ott a lista működik.
+6. **Navigáció** – az állomás lapján a „Navigáció" gomb a telefonod alapértelmezett térkép-/navigációs alkalmazását nyitja meg (gyalog és autóval is).
+7. **GPS engedély** – a „Megérkeztünk" gombhoz engedélyezd a helyadatokat az oldalnak (lásd lent).
+8. **Megérkeztünk** – az állomás közelében (alapból 120 méteren belül) koppints a gombra. A szerver ellenőrzi a távolságot; siker esetén nincs külön felugró ablak, az állomás „Teljesítve" lesz. Egy állomásra egyszer lehet becsekkolni.
+9. **Játékidő** – az első sikeres becsekkolásnál indul, és mutatja a haladást (pl. 5/18). Ha minden állomást teljesítettetek, megáll. Nincs ranglista, nincs verseny.
+10. **Fotó** – becsekkolás után állomásonként legfeljebb **5 fotót** tölthettek fel (JPEG, PNG, WebP, HEIC; max. 20 MB/fotó). A fotókból a helyadat és a metaadat törlődik. A fotók anonimak (nem látszik, melyik csapat töltötte fel). A saját fotót bármikor törölheted. Bármely fotó jelenthető („Fotó jelentése"): azonnal elrejtjük, az adminisztrátor elbírálja.
    - Csak olyan fotót tölts fel, amelynek megosztására jogosult vagy; gyermekekről csak megfelelő hozzájárulással/jogszerű alappal, és ne tölts fel személyes/adatvédelmi szempontból problémás tartalmat.
-10. **Elfogyott ajándék** – becsekkolás után jelezheted („Elfogyott az ajándék"), egy állomás aktuális ciklusában csapatonként egyszer. Ha három különböző csapat jelzi, az állomás „Valószínűleg elfogyott" figyelmeztetést kap. Az állomás ettől még kötelező marad, és becsekkolni lehet.
-11. **Offline működés** – ha nincs internet, a „Megérkeztünk" a telefon helyi ellenőrzésével működik: a teljesítés **„Szinkronizálásra vár"** jelöléssel megjelenik, a fotók is a telefonon várnak. Az eredeti időpont megmarad.
-12. **Szinkronizálás** – kapcsolat esetén automatikusan történik; a „Szinkronizálás most" gombbal kézzel is indítható. **iPhone-on előfordulhat, hogy az alkalmazást meg kell nyitnod a szinkronhoz.** **Ne töröld az alkalmazás/webhely adatait, amíg szinkronra váró elem van** – az offline adatok a telefon tárhelyén vannak, és a böngésző tárhely-tartósságot nem garantál korlátlanul. Ha egy elem hibás, a „Részletek"-ben újrapróbálhatod vagy elvetheted.
+11. **Elfogyott ajándék** – becsekkolás után jelezheted („Elfogyott az ajándék"), egy állomás aktuális ciklusában csapatonként egyszer. Ha három különböző csapat jelzi, az állomás „Valószínűleg elfogyott" figyelmeztetést kap. Az állomás ettől még kötelező marad, és becsekkolni lehet.
+12. **Offline működés** – ha nincs internet, a „Megérkeztünk" a telefon helyi ellenőrzésével működik: a teljesítés **„Szinkronizálásra vár"** jelöléssel megjelenik, a fotók is a telefonon várnak. Az eredeti időpont megmarad.
+13. **Szinkronizálás** – kapcsolat esetén automatikusan történik; a „Szinkronizálás most" gombbal kézzel is indítható. **iPhone-on előfordulhat, hogy az alkalmazást meg kell nyitnod a szinkronhoz.** **Ne töröld az alkalmazás/webhely adatait, amíg szinkronra váró elem van** – az offline adatok a telefon tárhelyén vannak, és a böngésző tárhely-tartósságot nem garantál korlátlanul. Ha egy elem hibás, a „Részletek"-ben újrapróbálhatod vagy elvetheted.
     - Ha egy állomást közben töröltek, vagy az időbélyeg gyanús, az adminisztrátor elbírálja a teljesítést (értesítést látsz az állomáson).
-13. **Módosítás / visszalépés** – a módosítási határidőig a Csapat fülön módosíthatod az adataidat és a tagokat (a számlálók azonnal frissülnek, új jóváhagyás nem kell), új e-mail-címet megerősítő levéllel adhatsz meg (a régi addig érvényes), és visszaléphetsz (megerősítéssel; a hozzáférés azonnal megszűnik). A határidő után ez már nem lehetséges.
-14. **PIN módosítása / elfelejtett PIN** – a Csapat fülön módosítható (minden eszköz kijelentkezik). Elfelejtett PIN: a belépő oldalon „Elfelejtettem a PIN-t" → e-mail-cím → rövid életű, egyszer használható link → új PIN kétszer.
-15. **Esemény után** – a hozzáférésed még 7 napig él.
+14. **Módosítás / visszalépés** – a módosítási határidőig a Csapat fülön módosíthatod az adataidat és a tagokat (a számlálók azonnal frissülnek, új jóváhagyás nem kell), új e-mail-címet megerősítő levéllel adhatsz meg (a régi addig érvényes), és visszaléphetsz (megerősítéssel; a hozzáférés azonnal megszűnik). A határidő után ez már nem lehetséges.
+15. **PIN módosítása / elfelejtett PIN** – a Csapat fülön módosítható (minden eszköz kijelentkezik). Elfelejtett PIN: a belépő oldalon „Elfelejtettem a PIN-t" → e-mail-cím → rövid életű, egyszer használható link → új PIN kétszer.
+16. **Esemény után** – a hozzáférésed még 7 napig él.
 
 ## GPS hibaelhárítás
 
@@ -33,7 +34,7 @@ Ugyanez a tartalom az alkalmazásban is elérhető (Útmutató fül). Magyar nye
 
 ## Házigazdáknak (host)
 
-1. **Jelentkezés** – kapcsolattartó, e-mail, telefon, **cím**, felvételi mód, opcionális megjegyzés a résztvevőknek. A szervezők a térképen megerősítik a pozíciót, majd jóváhagyják. A neved a csapatoknak sosem látszik: az állomásod „Állomás #N" néven jelenik meg.
+1. **Jelentkezés** – kapcsolattartó, e-mail, telefon, **cím**, felvételi mód, opcionális megjegyzés a résztvevőknek. A jelentkezéskor **te magad erősíted meg a térképen** a pozíciót: keresd meg a címed, és ha kell, húzd a jelölőt pontosan a házra. A szervezők ezután jóváhagyják. A neved a csapatoknak sosem látszik: az állomásod „Állomás #N" néven jelenik meg.
 2. **Belépés** – ugyanúgy, mint a csapatoknál (link + PIN, több eszköz, kijelentkezés, PIN-csere/-helyreállítás).
 3. **Ajándék előkészítése** – a Állomásom fülön látod a várható létszámot (gyermek/felnőtt/összesen). A módosítási határidő után véglegessé válik; ekkor e-mailt is kapsz a végleges számokkal.
 4. **Felvételi mód** – „Az ajándék kint van" vagy „Csengess / menj be". Az esemény közben **nem módosítható**.

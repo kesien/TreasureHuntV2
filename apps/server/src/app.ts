@@ -27,7 +27,8 @@ import { registerPhotoRoutes } from "./routes/photos.js";
 import { registerAdminOpsRoutes } from "./routes/adminOps.js";
 import { DefaultBackupRunner, type BackupRunner } from "./services/backup.js";
 import { recordError } from "./services/adminOps.js";
-import { GeocodeError, NominatimProvider, type GeocoderProvider } from "./services/geocode.js";
+import { GeocodeError, GoogleGeocoderProvider, NominatimProvider, type GeocoderProvider } from "./services/geocode.js";
+import { reserveGoogleCall } from "./services/googleQuota.js";
 
 export const ADMIN_COOKIE = "th_admin";
 export const ACCESS_COOKIE = "th_access";
@@ -41,7 +42,15 @@ declare module "fastify" {
 
 export interface AppDeps { cfg: Config; db: Db; geocoders?: GeocoderProvider[]; backupRunner?: BackupRunner; logger?: Logger }
 
-export async function buildApp({ cfg, db, geocoders = [new NominatimProvider()], backupRunner = new DefaultBackupRunner(), logger }: AppDeps) {
+/** Alapértelmezett lánc: Google (ha van szerverkulcs, havi plafonnal) -> Nominatim tartalék. */
+function defaultGeocoders(cfg: Config, db: Db): GeocoderProvider[] {
+  const chain: GeocoderProvider[] = [];
+  if (cfg.GOOGLE_GEOCODING_API_KEY) chain.push(new GoogleGeocoderProvider(cfg.GOOGLE_GEOCODING_API_KEY, () => reserveGoogleCall(db, cfg.GOOGLE_GEOCODING_MONTHLY_LIMIT)));
+  chain.push(new NominatimProvider());
+  return chain;
+}
+
+export async function buildApp({ cfg, db, geocoders = defaultGeocoders(cfg, db), backupRunner = new DefaultBackupRunner(), logger }: AppDeps) {
   const app = Fastify({
     loggerInstance: (logger ?? createLogger(cfg.NODE_ENV === "test" ? "silent" : "info")) as unknown as FastifyBaseLogger,
     disableRequestLogging: true, // (Fastify 6-ban változik: logController) saját, token-mentes kérésnapló (lásd onResponse)
@@ -51,21 +60,22 @@ export async function buildApp({ cfg, db, geocoders = [new NominatimProvider()],
   });
   const hub = new RealtimeHub();
   const secure = cfg.NODE_ENV === "production";
-  // A térképcsempe-szolgáltató a TILE_URL-ből származik (csere esetén a CSP is követi); {s} aldomén helyettesítve
-  const tileHost = new URL(cfg.TILE_URL.replace("{s}", "a").replace("{z}", "0").replace("{x}", "0").replace("{y}", "0")).hostname;
-  const tileOrigin = cfg.TILE_URL.includes("{s}") ? `https://*.${tileHost.split(".").slice(1).join(".")}` : `https://${tileHost}`;
+  // Google Maps JS API: szkript, csempék/ikonok, stílus és betűtípus
+  const gmaps = ["https://maps.googleapis.com", "https://maps.gstatic.com"];
 
   await app.register(helmet, {
-    // A publikus OSM csempeszerver Referer nélkül blokkol ("Access blocked"). Idegen origin felé csak az origin
-    // megy ki (útvonal nem), így a belépési token az URL-ben nem szivároghat.
+    // A Google API-kulcs referrer-korlátozásához Referer kell. Idegen origin felé csak az origin megy ki
+    // (útvonal nem), így a belépési token az URL-ben nem szivároghat.
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "blob:", tileOrigin],
-        connectSrc: ["'self'", tileOrigin],
+        scriptSrc: ["'self'", ...gmaps],
+        imgSrc: ["'self'", "data:", "blob:", ...gmaps, "https://*.googleapis.com", "https://*.ggpht.com", "https://*.googleusercontent.com"],
+        connectSrc: ["'self'", ...gmaps, "https://*.googleapis.com"],
         workerSrc: ["'self'", "blob:"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https:", "data:"],
         objectSrc: ["'none'"],
         frameAncestors: ["'none'"],
         upgradeInsecureRequests: secure ? [] : null,
@@ -120,7 +130,7 @@ export async function buildApp({ cfg, db, geocoders = [new NominatimProvider()],
   });
 
   app.get("/api/health", async () => ({ ok: true }));
-  app.get("/api/public/config", async () => ({ tileUrl: cfg.TILE_URL, tileAttribution: cfg.TILE_ATTRIBUTION, timezone: "Europe/Budapest" }));
+  app.get("/api/public/config", async () => ({ googleMapsApiKey: cfg.GOOGLE_MAPS_API_KEY, mapId: cfg.GOOGLE_MAPS_MAP_ID, timezone: "Europe/Budapest" }));
 
   const ctx: RouteCtx = { cfg, db, hub, secure, geocoders, backupRunner };
   await registerAdminRoutes(app, ctx);

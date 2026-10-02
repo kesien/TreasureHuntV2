@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import { MapView, type Marker } from "../../components/MapView";
+import { RoutePlanner } from "../../components/RoutePlanner";
 import { PhotoGallery } from "../../components/Photos";
 import { SyncBanner } from "../../components/SyncBanner";
 import { Badge, Banner, Button, ErrorText, Loading, Sheet, useAction } from "../../components/ui";
@@ -53,6 +54,7 @@ function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () 
   const [mode, setMode] = useState<"list" | "map">("map");
   const [filter, setFilter] = useState<Filter>("all");
   const [selected, setSelected] = useState<string | null>(null);
+  const [routing, setRouting] = useState(false);
   const reloadAll = useCallback(() => { stationsQ.reload(); progressQ.reload(); reloadTeam(); }, [stationsQ.reload, progressQ.reload, reloadTeam]);
   const live = useLive("/api/access/stream", reloadAll);
   // Szinkron után frissítjük a szerver szerinti állapotot
@@ -70,6 +72,7 @@ function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () 
     title: `${s.label}${s.done ? ", teljesítve" : ""}${s.likelyOut ? ", valószínűleg elfogyott" : ""}`,
   }));
   const sel = rows.find((s) => s.id === selected) ?? null;
+  const remainingForRoute = useMemo(() => rows.filter((s) => !s.done).map((s) => ({ id: s.id, number: s.number, label: s.label, latitude: s.latitude, longitude: s.longitude })), [rows]);
 
   if (stationsQ.loading && !stationsQ.data) return <div className="page"><Loading /></div>;
   const completedIds = new Set(rows.filter((s) => s.done).map((s) => s.id));
@@ -111,8 +114,12 @@ function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () 
                 <button type="button" className="chip" aria-pressed={mode === "list"} onClick={() => setMode("list")}>Lista</button>
               </div>
             </div>
+            {remainingForRoute.length > 0 && online && (
+              <div className="row"><Button variant="secondary" small onClick={() => setRouting(true)}>🧭 Útvonal a hátralévő állomásokra</Button></div>
+            )}
+            {routing && <RoutePlanner remaining={remainingForRoute} onClose={() => setRouting(false)} />}
             {mode === "map" ? (
-              <MapView markers={markers} center={stationsQ.data.center} onMarkerClick={setSelected} />
+              <MapView markers={markers} center={stationsQ.data.center} onMarkerClick={setSelected} onUnavailable={() => setMode("list")} />
             ) : (
               <ul className="list">
                 {shown.map((s) => (

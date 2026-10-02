@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { randomInt } from "node:crypto";
-import { modificationAllowed, normalizeHuPhone, validatePin, type EventStatus, type MemberCategory, type PickupMode } from "@th/shared";
+import { distanceMeters, modificationAllowed, normalizeHuPhone, validatePin, type EventStatus, type MemberCategory, type PickupMode } from "@th/shared";
 import type { Config } from "../config.js";
 import type { Db } from "../db/client.js";
 import { accessCredentials, events, hosts, participantTokens, policyConsents, teamMembers, teams } from "../db/schema.js";
@@ -104,7 +104,11 @@ export async function submitTeam(db: Db, cfg: Config, eventId: string, input: Te
 export interface HostApplication {
   contactName: string; email: string; phone: string; address: string;
   pickupMode: PickupMode; participantNote?: string; consent: boolean;
+  /** A host a jelentkezéskor maga erősíti meg a térképen; hiányában az admin erősít meg jóváhagyás előtt. */
+  location?: { lat: number; lon: number; placeId?: string };
 }
+
+export const MAX_LOCATION_DISTANCE_M = 50_000;
 
 export async function submitHost(db: Db, cfg: Config, eventId: string, input: HostApplication, idemKey: string) {
   const ev = await loadEvent(db, eventId);
@@ -114,9 +118,18 @@ export async function submitHost(db: Db, cfg: Config, eventId: string, input: Ho
   if (!phone) throw new AppError("invalid_phone", "Adj meg érvényes magyar telefonszámot, pl. +36 30 123 4567.");
   const [dup] = await db.select().from(hosts).where(and(eq(hosts.eventId, eventId), eq(hosts.idempotencyKey, idemKey)));
   if (dup) return { id: dup.id, duplicate: true };
+  const loc = input.location;
+  if (loc) {
+    if (!Number.isFinite(loc.lat) || !Number.isFinite(loc.lon) || Math.abs(loc.lat) > 90 || Math.abs(loc.lon) > 180) throw new AppError("invalid_location", "Hibás pozíció.");
+    // Ésszerűségi ellenőrzés: az esemény településétől messze lévő pont valószínűleg elírás
+    if (ev.centerLat != null && ev.centerLon != null && distanceMeters(loc.lat, loc.lon, ev.centerLat, ev.centerLon) > MAX_LOCATION_DISTANCE_M) {
+      throw new AppError("invalid_location", "A megadott pozíció túl messze van az esemény településétől. Ellenőrizd a címet és a jelölőt.");
+    }
+  }
   try {
     const host = await db.transaction(async (tx) => {
       const [h] = await tx.insert(hosts).values({
+        ...(loc ? { latitude: loc.lat, longitude: loc.lon, locationConfirmed: true, placeId: loc.placeId ?? null } : {}),
         eventId, contactName: input.contactName.trim(), email: input.email.trim().toLowerCase(), phone,
         address: input.address.trim(), normalizedAddress: normalizeAddress(input.address),
         pickupMode: input.pickupMode, participantNote: input.participantNote?.trim() || null, idempotencyKey: idemKey,

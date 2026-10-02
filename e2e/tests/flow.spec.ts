@@ -75,6 +75,8 @@ test("teljes folyamat: admin → jelentkezés → jóváhagyás → check-in (on
   await pub.getByLabel("E-mail cím").fill("bela@example.hu");
   await pub.getByLabel("Telefonszám").fill("+36 20 111 2233");
   await pub.getByLabel("Az állomás címe").fill("Fő utca 12., Teszthely");
+  // A Google nincs a tesztben: a pozíció nélküli (admin által megerősített) tartalék utat használjuk
+  await pub.getByLabel(/Nem sikerült a térképen megadni/).check();
   await pub.getByLabel(/Elfogadom/).check();
   await pub.getByRole("button", { name: "Jelentkezés elküldése" }).click();
   await expect(pub.getByText("Köszönjük a jelentkezést!")).toBeVisible();

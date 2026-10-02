@@ -12,7 +12,7 @@ Ezek az MVP tudatos vagy eddig fel nem oldott korlátai. A jövőbeli fejleszté
 
 ## Működési korlátok
 
-6. **Host pozíciójának megerősítése**: jelentkezéskor a hostnak még nincs munkamenete, ezért a pozíciót az admin erősíti meg a jóváhagyás előtt (a jóváhagyás csak megerősített pozícióval megy). A host belépés után maga is finomíthatja.
+6. **Host pozíciójának megerősítése**: a host a jelentkezéskor maga erősíti meg a térképen (a geokódolás csak javaslat). Ha a térkép/geokódolás nem működik, pozíció nélkül is jelentkezhet, és ilyenkor az admin erősít meg a jóváhagyás előtt; az admin mindig felülbírálhat. Az esemény településétől 50 km-nél távolabbi pozíciót a szerver elutasít (elírás-védelem).
 7. **Pontatlan GPS határa**: 100 m (`MAX_ACCURACY_M`) – a spec nem rögzítette. Rosszabb pontosságnál a rendszer nem dönt, a csapatnak újra kell próbálnia (offline ág: review).
 8. **Offline GPS-újraellenőrzés**: a szerver csak úgy tud újraellenőrizni, ha a szinkron kérés ideiglenesen tartalmazza a koordinátát (nem tárolt, nem naplózott, de az átvitel idejére létezik). Alternatíva (kevésbé biztonságos): csak kliens-számolt távolság.
 9. **Eseményvég és szinkron**: a lezárás utáni szinkron a résztvevői hozzáférés lejáratáig (7 nap) lehetséges; ez után az offline sor tartalma a telefonon marad, de nem szinkronizálható.
@@ -20,7 +20,7 @@ Ezek az MVP tudatos vagy eddig fel nem oldott korlátai. A jövőbeli fejleszté
 11. **Érzékeny e-mailek újraküldése**: a belépési linket/PIN-t tartalmazó levél törzse küldés után törlődik (adatvédelmi okból), ezért kézi „újraküldés" helyett új hozzáférést kell kiadni (új link + új PIN) vagy csak új linket.
 12. **Egy host – egy állomás**: egy host-jelentkezés egy címet jelent; több cím = több jelentkezés (a spec szerint).
 13. **Késői jóváhagyás**: csapat/host jóváhagyása az esemény indítása után nem lehetséges (a függő jelentkezés lejár); új állomást ilyenkor az admin hozhat létre host nélkül.
-14. **Publikus OSM csempe és Nominatim**: használati szabályzatuk szerint nem korlátlan éles szolgáltatások (cache és rate limit van, de nagyobb forgalomnál szolgáltatót kell váltani).
+14. **Google Maps Platform feltételek és költség**: a Google Geocoding feltételei a lat/lng tartós tárolását formálisan nem engedik (csak a place ID tárolható; azt mentjük is). Az állomások koordinátái mégis tárolódnak, mert a check-in távolság-ellenőrzéshez kellenek; a tárolt pozíciót mindig a host/admin erősíti meg a térképen (húzható marker). Ezt a kockázatot az üzemeltető vállalta. A Google Maps nem gyorsítótárazható és offline nem működik: offline a csapatnézet listára esik vissza (a check-in offline sor érintetlen). A havi geokódolási plafon (`GOOGLE_GEOCODING_MONTHLY_LIMIT`) után a Nominatim tartalék működik, amelynek magyar házszám-lefedettsége hiányos lehet. A DirectionsService (útvonal) legacy API lehet új Cloud-projekteknél; ha nem engedélyezhető, a Routes API-ra kell váltani.
 15. **Egyetlen szerverpéldány**: a rate limit és a háttérmunkák adatbázis-alapúak (több példányon is helyesek), de az SSE kapcsolatok folyamatonként élnek – több app-példány esetén egy szerveren kiváltott eseményről a másik példány kliensei csak a következő frissítéskor (újracsatlakozás/újratöltés) értesülnek. A célméretnél (egy példány) ez nem jelent problémát.
 16. **Mentés**: nincs folyamatos (WAL) archiválás; legrosszabb esetben a legutóbbi mentés óta eltelt idő veszik el. Az admin felületen nincs visszaállítás gomb (szándékosan).
 17. **Admin felület mobilon**: használható, de elsődlegesen asztali böngészőre készült.

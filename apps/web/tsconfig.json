@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["vite/client", "vite-plugin-pwa/client"]
+    "types": ["vite/client", "vite-plugin-pwa/client", "google.maps"]
   },
   "include": ["src", "vite.config.ts"]
 }

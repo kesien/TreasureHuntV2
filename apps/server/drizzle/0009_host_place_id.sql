@@ -1,0 +1,1 @@
+ALTER TABLE "hosts" ADD COLUMN "place_id" text;

@@ -33,15 +33,16 @@ Self-hosted, mobil-first PWA egy kisvárosi, szezonális közösségi eseményhe
 | PWA | vite-plugin-pwa (Workbox) | Telepíthető, app shell offline; az API-t nem cache-eli a service worker |
 | Offline | IndexedDB (`idb`) | Fotó Blob-ként is tárolható; localStorage erre nem alkalmas |
 | Valós idő | SSE (+ újracsatlakozáskor teljes frissítés) | Egyirányú frissítés elég, proxy-barát, egyszerű; a jelzés csak „változott", így a jogosultságot mindig a normál API ellenőrzi |
-| Térkép | MapLibre GL JS, OSM-alapú csempe (`TILE_URL`) | Nyílt, szolgáltató nem beégetett; self-hosted csempére cserélhető |
-| Geokódolás | szerveroldali `GeocoderProvider` (Nominatim az alap) | Cache + rate limit + fallback lánc; a böngésző sosem hív geokódolót |
+| Térkép | Google Maps JavaScript API (`@googlemaps/js-api-loader`), AdvancedMarkerElement, InfoWindow | Pontos magyar címlefedettség (az OSM-ben sok kisvárosi házszám hiányzik); a kulcs referrer-korlátozott; offline nem működik, a csapatnézet listára esik vissza |
+| Útvonal | Google DirectionsService (`optimizeWaypoints`, gyalog), kliensoldalon | Opcionális javaslat a hátralévő állomásokra; a pozíciót nem tároljuk és nem naplózzuk |
+| Geokódolás | szerveroldali `GeocoderProvider` lánc: Google Geocoding API (havi plafonnal) → Nominatim tartalék | Cache + plafon + fallback; a böngésző sosem hív geokódolót; a geokódolás csak javaslat, a pozíciót a host/admin megerősíti a térképen |
 | Képfeldolgozás | sharp + file-type + heic-decode | Tartalom-ellenőrzés, pixelkorlát, EXIF/GPS törlés, átméretezés; a sharp előre fordított változata HEIC-et nem tud, ezért a HEIC-et WASM dekóder oldja meg |
 | E-mail | nodemailer (SMTP) | Szabványos, nincs szolgáltatófüggés |
 | Auth | argon2id (PIN/jelszó), SHA-256 (nagy entrópiájú tokenek), otplib TOTP | A tokeneket csak hash-elve tároljuk |
 | Teszt | Vitest, Playwright | Egység/integráció/E2E/offline |
 | Telepítés | Docker Compose | `app` + `db`, perzisztens volume-ok |
 
-Nem használtunk: Redis, Kubernetes, Grafana/Prometheus, fizetős térkép/geokódoló, push infrastruktúra (a spec szerint nem MVP).
+Nem használtunk: Redis, Kubernetes, Grafana/Prometheus, push infrastruktúra (a spec szerint nem MVP). A térkép és a geokódolás Google Maps Platform (kulcs + havi plafon + költségkeret az üzemeltetőnél).
 
 ## Szerepkörök és hozzáférés
 
@@ -125,6 +126,6 @@ Tárolás UTC-ben (`timestamptz`), megjelenítés magyar formátumban, 24 órás
 7. **Első admin** – parancssori bootstrap (`npm run admin:bootstrap`).
 8. **HEIC** – WASM dekóder (`heic-decode`), valódi iPhone-os fájllal kézzel ellenőrizendő.
 9. **Anonimizálás vs. korlátlan audit** – az audit csak azonosítókat és minimális adatot tartalmaz, az entitás személyes adata törlődik.
-10. **Host pozíciójának megerősítése** – a jelentkezéskor még nincs munkamenet, ezért az admin erősíti meg a jóváhagyás előtt; a host belépés után finomíthat. A jóváhagyás csak megerősített pozícióval megy.
+10. **Host pozíciójának megerősítése** – a host a jelentkezéskor maga erősíti meg a térképen (nyilvános, IP-nként korlátozott geokódoló végpont; a jelölő húzható); ha ez nem sikerül, pozíció nélkül is jelentkezhet, és ilyenkor az admin erősít meg a jóváhagyás előtt. Az admin mindig felülbírálhatja. A jóváhagyás csak megerősített pozícióval megy.
 11. **Fotó-láthatóság „jogosult résztvevők"** – az állomáson becsekkolt csapatok, az állomás hostja és az admin.
 12. **Pontatlan GPS határa** – a spec nem rögzítette; 100 m (`MAX_ACCURACY_M`).

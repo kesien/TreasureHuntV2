@@ -4,7 +4,7 @@ import { geocodeCache } from "../db/schema.js";
 import { normalizeAddress } from "./applications.js";
 import { hit } from "./rateLimit.js";
 
-export interface GeoResult { lat: number; lon: number; label: string; provider: string }
+export interface GeoResult { lat: number; lon: number; label: string; provider: string; placeId?: string }
 
 /** Cserélhető geokódoló szolgáltató (spec §14, §85). */
 export interface GeocoderProvider {
@@ -31,6 +31,26 @@ export function withLocality(address: string, locality: string): string {
   const loc = locality.trim();
   if (!loc || normalizeAddress(address).includes(normalizeAddress(loc))) return address;
   return `${address}, ${loc}`;
+}
+
+/**
+ * Google Geocoding API (szerveroldalon). A hívás előtt lefoglal egy egységet a havi plafonból; ha elfogyott,
+ * hibát dob, így a lánc a következő szolgáltatóra (Nominatim) lép.
+ */
+export class GoogleGeocoderProvider implements GeocoderProvider {
+  name = "google";
+  constructor(private apiKey: string, private reserve: () => Promise<boolean>, private fetchImpl: typeof fetch = fetch) {}
+  async search(address: string): Promise<GeoResult | null> {
+    if (!(await this.reserve())) throw new Error("google monthly limit reached");
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=hu&language=hu&components=country:HU&key=${encodeURIComponent(this.apiKey)}`;
+    const res = await this.fetchImpl(url, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(`google geocoder http ${res.status}`);
+    const body = (await res.json()) as { status: string; results?: Array<{ formatted_address: string; place_id: string; geometry: { location: { lat: number; lng: number } } }> };
+    if (body.status === "ZERO_RESULTS") return null;
+    if (body.status !== "OK" || !body.results?.[0]) throw new Error(`google geocoder ${body.status}`);
+    const r = body.results[0];
+    return { lat: r.geometry.location.lat, lon: r.geometry.location.lng, label: r.formatted_address, provider: this.name, placeId: r.place_id };
+  }
 }
 
 export class GeocodeError extends Error {

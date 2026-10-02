@@ -42,7 +42,7 @@ Az E2E teszt saját adatbázist (`th_e2e`) hoz létre a tesztadatbázis-szervere
 ## Ismert lyukak a tesztekben (őszintén)
 
 - **Valódi eszközök**: Android Chrome és iPhone Safari – valódi GPS, valódi HEIC fotó, telepített PWA, iOS-es offline viselkedés – **kézzel tesztelendő** éles használat előtt. A Playwright csak emulált helymeghatározást és hálózat-kikapcsolást használ.
-- **Valódi SMTP szolgáltató** és valódi OSM/Nominatim hívás nincs tesztelve (a geokódoló és a mailer cserélhető/mockolt).
+- **Valódi SMTP szolgáltató** és valódi Google Maps/Geocoding/Directions hívás és a Nominatim nincs tesztelve (a geokódoló mockolt, a térkép az E2E-ben nem töltődik be; a tartalék utak le vannak fedve). A térképet, a húzható markert és az útvonal-optimalizálást valódi kulccsal kézzel kell kipróbálni.
 - **Terheléses teszt** nincs (a célméret ~100–120 résztvevő).
 - Az E2E jelenleg egyetlen, hosszú forgatókönyv; a T−24 felfedés, az admin manuális check-in, a fotó-moderáció és az esemény-lemondás böngészős E2E-je szerveroldalon (integrációs szinten) le van fedve, de UI-szinten nem.
 - Akadálymentesség: nincs formális WCAG audit (spec szerint nem MVP); kézi ellenőrzési lista a biztonsági checklist végén.

@@ -66,6 +66,7 @@ export async function registerApplicationRoutes(app: FastifyInstance, { cfg, db,
     const b = z.object({
       contactName: z.string().min(1).max(100), email: z.string().email().max(200), phone, address: z.string().min(5).max(300),
       pickupMode: z.enum(PICKUP_MODES), participantNote: z.string().max(500).optional(), consent: z.boolean(),
+      location: z.object({ lat: z.number().min(-90).max(90), lon: z.number().min(-180).max(180), placeId: z.string().max(300).optional() }).optional(),
     }).parse(req.body);
     const r = await submitHost(db, cfg, id, b, idemKey(req));
     hub.publish("admin", "applications");

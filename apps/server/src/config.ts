@@ -10,8 +10,11 @@ const schema = z.object({
   BACKUP_DIR: z.string().default("./data/backups"),
   BACKUP_DAILY_RETENTION_DAYS: z.coerce.number().int().min(7).default(7),
   BACKUP_SNAPSHOT_RETENTION_DAYS: z.coerce.number().int().min(30).default(730),
-  TILE_URL: z.string().default("https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
-  TILE_ATTRIBUTION: z.string().default("© OpenStreetMap közreműködők"),
+  // Google Maps Platform. A böngészőkulcsot referrer szerint, a szerverkulcsot IP szerint korlátozd a Cloud Console-ban.
+  GOOGLE_MAPS_API_KEY: z.string().default(""), // Maps JavaScript API (böngésző; publikus, a /api/public/config adja)
+  GOOGLE_MAPS_MAP_ID: z.string().default("DEMO_MAP_ID"), // AdvancedMarkerElement-hez kötelező
+  GOOGLE_GEOCODING_API_KEY: z.string().default(""), // Geocoding API (szerver); üres -> Nominatim
+  GOOGLE_GEOCODING_MONTHLY_LIMIT: z.coerce.number().int().min(0).default(1000), // ennyi hívás/hó után Nominatim
   WEB_DIST: z.string().default("../web/dist"),
   APP_VERSION: z.string().default("0.1.0"),
 });

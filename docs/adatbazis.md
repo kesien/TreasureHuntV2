@@ -129,6 +129,7 @@ Megkötések / indexek: `teams_event_name_uq` (egyedi), `teams_idem_uq` (egyedi)
 | latitude | double |  |
 | longitude | double |  |
 | location_confirmed | boolean | not null default false |
+| place_id | text | — Google place ID (a Google feltételei szerint ez tárolható) |
 | pickup_mode | text | not null — gift_outside | ring_bell |
 | participant_note | text |  |
 | status | text | not null default "pending" |

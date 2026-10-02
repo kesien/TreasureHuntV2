@@ -24,13 +24,13 @@ export async function findNearby(db: Db | Tx, eventId: string, lat: number, lon:
 const validCoord = (lat: number, lon: number) => Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
 
 /** Host pozíciójának megerősítése (host vagy admin); a végleges marker koordinátája lesz az állomás helye. */
-export async function confirmHostLocation(db: Db, actor: { type: "host" | "admin"; id: string }, hostId: string, lat: number, lon: number) {
+export async function confirmHostLocation(db: Db, actor: { type: "host" | "admin"; id: string }, hostId: string, lat: number, lon: number, placeId?: string) {
   if (!validCoord(lat, lon)) throw new AppError("invalid_coord", "Hibás koordináta.");
   const [h] = await db.select().from(hosts).where(eq(hosts.id, hostId));
   if (!h) throw new AppError("not_found", "Nem található.", 404);
   if (!["pending", "approved"].includes(h.status)) throw new AppError("bad_state", "Ez a jelentkezés már nem módosítható.", 409);
   await db.transaction(async (tx) => {
-    await tx.update(hosts).set({ latitude: lat, longitude: lon, locationConfirmed: true, updatedAt: new Date() }).where(eq(hosts.id, hostId));
+    await tx.update(hosts).set({ latitude: lat, longitude: lon, locationConfirmed: true, placeId: placeId ?? null, updatedAt: new Date() }).where(eq(hosts.id, hostId));
     await tx.update(stations).set({ latitude: lat, longitude: lon }).where(eq(stations.hostId, hostId));
     await audit(tx, { actorType: actor.type, actorId: actor.id, action: "host.location_confirmed", entityType: "host", entityId: hostId, eventId: h.eventId });
   });

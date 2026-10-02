@@ -10,7 +10,7 @@
 | Secure süti | ✅ | `NODE_ENV=production` esetén `Secure` (HTTP-n éles módban a belépés nem működik). |
 | HttpOnly süti, SameSite | ✅ | Minden munkamenet-süti `HttpOnly; SameSite=Lax`. |
 | CSRF védelem | ✅ | Cookie-s munkamenetnél állapotváltoztató kérésekhez kötelező `X-CSRF-Token` (munkamenetenként véletlen, időzítés-biztos összehasonlítás); teszt: `auth.test.ts`. A munkamenet nélküli (publikus) végpontok rate limitelt, CSRF-érzéketlen műveletek. |
-| CSP és biztonsági fejlécek | ✅ | `@fastify/helmet`: `default-src 'self'`, szkript csak saját, `frame-ancestors 'none'`, `object-src 'none'`, `nosniff`, HSTS (production). A térképcsempe-szolgáltató a `TILE_URL`-ből kerül a CSP-be. |
+| CSP és biztonsági fejlécek | ✅ | `@fastify/helmet`: `default-src 'self'`, szkript csak saját, `frame-ancestors 'none'`, `object-src 'none'`, `nosniff`, HSTS (production). A CSP a Google Maps JS API forrásait engedi (`maps.googleapis.com`, `maps.gstatic.com`, `*.ggpht.com`). |
 | Bemenet-ellenőrzés | ✅ | Minden végpont zod-sémával; telefon/PIN/dátum szabályok a közös csomagban. |
 | SQL injection | ✅ | Paraméterezett lekérdezések (Drizzle); a kézi `sql` sablonok is paraméterezettek. |
 | XSS | ✅ | React alapból escape-el; nincs `dangerouslySetInnerHTML`; e-mail HTML-ben minden dinamikus érték escape-elt (teszt). |
@@ -22,7 +22,7 @@
 | Feltöltés-ellenőrzés | ✅ | Tartalom alapú típusellenőrzés (nem kiterjesztés), 20 MB, hamis/megcsonkított fájl elutasítva. |
 | Képfeldolgozási korlátok | ✅ | 64 MP pixelkorlát (dekompressziós bomba), egyszerre 2 feldolgozás, EXIF/GPS törlés, újrakódolás; a fotók elérése jogosultság-ellenőrzéssel, `nosniff`. |
 | Éles hibaválasz stack trace nélkül | ✅ | Egységes magyar hibaüzenet; a 500-as hibák rövid, PII nélküli bejegyzésként az adminnak látszanak. |
-| Függőségfrissítési stratégia | 🟡 | `npm audit --omit=dev` jelenleg **0 ismert sérülékenység** (a drizzle-orm, maplibre-gl és react-router frissítve). **Üzemeltetői teendő:** havonta `npm audit` + `npm outdated`, biztonsági közleménynél azonnal; frissítés után tesztek és új image. |
+| Függőségfrissítési stratégia | 🟡 | `npm audit --omit=dev` jelenleg **0 ismert sérülékenység** (a drizzle-orm és react-router frissítve). **Üzemeltetői teendő:** havonta `npm audit` + `npm outdated`, biztonsági közleménynél azonnal; frissítés után tesztek és új image. |
 | Docker minimális jogosultság | ✅ | Nem root felhasználó (`node`), `cap_drop: [ALL]`, `no-new-privileges`, a port csak localhost-on; a konténer a `/data` volume-on kívül nem ír. |
 
 ## Egyéb védelmek
@@ -33,6 +33,7 @@
 | Hozzáférés-ellenőrzés | ✅ | Minden résztvevői művelet szerveroldalon ellenőrzi az esemény/résztvevő státuszát, határidőt, állomás-állapotot és jogosultságot; a kliens csak megjelenít. |
 | Adatvédelem / minimalizálás | ✅ | Nincs születési dátum, folyamatos GPS vagy csapat-helyzet; a pontos GPS nem tárolt; a host neve sosem látszik; a T−24 előtti helyszín nem szivárog (teszt). |
 | Munkamenet-kezelés | ✅ | Admin: 8 óra inaktivitás; résztvevő: eszközönkénti, PIN-csere/-helyreállítás minden munkamenetet megszüntet; esemény lezárás +7 nap / lemondás: hozzáférés megszűnik. |
+| Google API-kulcsok | 🟡 | A böngészőkulcs publikus, ezért **referrer-korlátozás kötelező**; a szerverkulcs IP-korlátozott, és nincs a kliensnek kiadva. Havi plafon + Cloud Console költségkeret/riasztás. **Üzemeltetői teendő.** |
 | Titkok | 🟡 | `APP_SECRET`, `DB_PASSWORD`, SMTP-jelszó: a `.env` nincs a repositoryban; az SMTP-jelszó titkosítva tárolt. **Üzemeltetői teendő:** `.env` jogosultságok (600), titok-mentés a szerveren kívül. |
 | Mentések | 🟡 | Tartalmaznak személyes adatot; **üzemeltetői teendő:** a célhely védelme / titkosítása. |
 | SSE | ✅ | Csak „változott" jelzés, adatot nem hordoz; az adat a jogosultság-ellenőrzött API-ból jön. |
