@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -)",
+      "Bash(npx tsc *)",
+      "Bash(npx drizzle-kit *)",
+      "Bash(npx vitest *)",
+      "Bash(npx vite *)",
+      "Bash(node scripts/gen-docs.mjs)"
+    ]
+  }
+}

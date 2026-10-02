@@ -64,7 +64,7 @@ function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: (sav
   const [f, setF] = useState({
     name: event?.name ?? "", type: event?.type ?? "halloween", shortDescription: event?.shortDescription ?? "", rules: event?.rules ?? "",
     registrationStart: toLocalInput(event?.registrationStart), registrationClose: toLocalInput(event?.registrationClose), modificationDeadline: toLocalInput(event?.modificationDeadline),
-    plannedStart: toLocalInput(event?.plannedStart), plannedEnd: toLocalInput(event?.plannedEnd), checkinRadiusM: event?.checkinRadiusM ?? 120, organizerContact: event?.organizerContact ?? "",
+    plannedStart: toLocalInput(event?.plannedStart), plannedEnd: toLocalInput(event?.plannedEnd), checkinRadiusM: event?.checkinRadiusM ?? 120, locality: event?.locality ?? "", organizerContact: event?.organizerContact ?? "",
   });
   const a = useAction();
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -101,6 +101,9 @@ function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: (sav
   return (
     <Sheet title={event ? "Esemény szerkesztése" : "Új esemény"} onClose={() => onClose(false)}>
       <Field label="Név"><Input value={f.name} onChange={(e) => set("name", e.target.value)} required /></Field>
+      <Field label="Település" hint="Pl. Derekegyháza. A címkeresés ezt hozzáfűzi, így elég az utca és házszám; a résztvevői térkép is erre fókuszál.">
+        <Input value={f.locality} onChange={(e) => set("locality", e.target.value)} maxLength={100} />
+      </Field>
       <Field label="Típus" hint="A vizuális téma automatikusan a típusból adódik."><Select value={f.type} onChange={(e) => set("type", e.target.value)}><option value="halloween">Halloween</option><option value="easter">Húsvét</option></Select></Field>
       <Field label="Rövid leírás"><Textarea value={f.shortDescription} onChange={(e) => set("shortDescription", e.target.value)} maxLength={1000} /></Field>
       <Field label="Részletes szabályzat" hint="Jogi szöveg: indulás előtt magyar/EU adatvédelmi szakemberrel ellenőriztesd."><Textarea style={{ minHeight: 180 }} value={f.rules} onChange={(e) => set("rules", e.target.value)} /></Field>

@@ -8,16 +8,17 @@ import { runScheduled } from "../src/services/scheduler.js";
 import { createActiveAdmin, loginAdmin, resetDb, setup, type Ctx } from "./helpers.js";
 
 let calls = 0;
+const queries: string[] = [];
 const fake: GeocoderProvider = {
   name: "fake",
-  async search(a) { calls++; return a.includes("Nincs") ? null : { lat: 47.5, lon: 19.0, label: a, provider: "fake" }; },
+  async search(a) { calls++; queries.push(a); return a.includes("Nincs") ? null : { lat: 47.5, lon: 19.0, label: a, provider: "fake" }; },
 };
 const broken: GeocoderProvider = { name: "broken", async search() { throw new Error("down"); } };
 
 let ctx: Ctx;
 beforeAll(async () => { ctx = await setup([broken, fake]); });
 afterAll(async () => { await ctx.app.close(); await ctx.pool.end(); });
-beforeEach(async () => { await resetDb(ctx.db); calls = 0; });
+beforeEach(async () => { await resetDb(ctx.db); calls = 0; queries.length = 0; });
 
 const hour = 3600_000;
 async function mkEvent(over: Partial<typeof events.$inferInsert> = {}) {
@@ -55,7 +56,7 @@ describe("geokódolás", () => {
     expect((await go("Fő utca 1., Teszt")).json()).toMatchObject({ found: true, lat: 47.5 });
     await go("fő u. 1 teszt"); // ugyanaz normalizálva → cache
     expect(calls).toBe(1);
-    expect((await go("Nincs ilyen utca 99")).json()).toEqual({ found: false });
+    expect((await go("Nincs ilyen utca 99")).json()).toEqual({ found: false, center: null });
   });
   it("bejelentkezés nélkül 401", async () => {
     expect((await ctx.app.inject({ method: "POST", url: "/api/geocode", payload: { address: "Fő utca 1." } })).statusCode).toBe(401);
@@ -161,4 +162,41 @@ describe("ütemezett feladatok", () => {
     expect(t24.map((m) => m.recipient).sort()).toEqual([host.email, "korai@x.hu"].sort());
     expect((await ctx.db.select().from(emailDeliveries).where(eq(emailDeliveries.type, "host_final_counts"))).length).toBe(1);
   });
+  it("település: a címkeresés hozzáfűzi, az esemény közepét geokódolja, a résztvevői állomáslista visszaadja", async () => {
+    const h = await admin();
+    const now = Date.now();
+    const body = {
+      name: "Derekegyházi", type: "halloween", locality: "Derekegyháza",
+      registrationStart: new Date(now - 3 * hour), registrationClose: new Date(now + hour), modificationDeadline: new Date(now + 2 * hour),
+      plannedStart: new Date(now + 3 * hour), plannedEnd: new Date(now + 6 * hour),
+    };
+    const created = await ctx.app.inject({ method: "POST", url: "/api/admin/events", headers: h, payload: body });
+    expect(created.statusCode).toBe(201);
+    const ev = created.json();
+    expect(ev.locality).toBe("Derekegyháza");
+    expect(ev.centerLat).toBe(47.5); // a település geokódolva
+    expect(queries).toContain("Derekegyháza");
+
+    queries.length = 0;
+    const r = await ctx.app.inject({ method: "POST", url: "/api/geocode", headers: h, payload: { address: "Fő utca 12.", eventId: ev.id } });
+    expect(r.json()).toMatchObject({ found: true, center: { lat: 47.5, lon: 19.0 } });
+    expect(queries).toEqual(["Fő utca 12., Derekegyháza"]);
+
+    // ha a cím már tartalmazza a települést, nem duplázzuk
+    queries.length = 0;
+    await ctx.app.inject({ method: "POST", url: "/api/geocode", headers: h, payload: { address: "Kert utca 3., Derekegyháza", eventId: ev.id } });
+    expect(queries).toEqual(["Kert utca 3., Derekegyháza"]);
+
+    // település nélküli esemény: változatlan keresés
+    const plain = await mkEvent();
+    queries.length = 0;
+    await ctx.app.inject({ method: "POST", url: "/api/geocode", headers: h, payload: { address: "Kossuth utca 5.", eventId: plain.id } });
+    expect(queries).toEqual(["Kossuth utca 5."]);
+  });
+
+  it("a Referrer-Policy engedi az origin küldését (az OSM csempeszerver Referer nélkül blokkol), de útvonalat nem", async () => {
+    const r = await ctx.app.inject({ method: "GET", url: "/api/health" });
+    expect(r.headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+  });
+
 });

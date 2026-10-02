@@ -68,7 +68,7 @@ function CreateStation({ eventId, onClose }: { eventId: string; onClose: (ok: bo
   return (
     <Sheet title="Állomás létrehozása (host nélkül)" onClose={() => onClose(false)}>
       <Field label="Cím"><Input value={address} onChange={(e) => setAddress(e.target.value)} /></Field>
-      <LocationPicker address={address} confirmLabel="Pozíció megerősítése" onConfirm={async (lat, lon) => setPos({ lat, lon })} />
+      <LocationPicker address={address} eventId={eventId} confirmLabel="Pozíció megerősítése" onConfirm={async (lat, lon) => setPos({ lat, lon })} />
       <Field label="Felvételi mód"><Select value={mode} onChange={(e) => setMode(e.target.value)}><option value="gift_outside">Az ajándék kint van</option><option value="ring_bell">Csengetni / bejönni</option></Select></Field>
       <Field label="Résztvevői megjegyzés"><Textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} /></Field>
       <ErrorText error={a.error} />

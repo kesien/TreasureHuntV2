@@ -4,9 +4,9 @@ import { PICKUP_MODES } from "@th/shared";
 import { requireAdmin, type RouteCtx } from "../app.js";
 import { hit } from "../services/rateLimit.js";
 import { AppError } from "../services/applications.js";
-import { geocodeAddress, GeocodeError } from "../services/geocode.js";
+import { geocodeAddress, GeocodeError, withLocality } from "../services/geocode.js";
 import { and, eq } from "drizzle-orm";
-import { checkIns, hosts, teams } from "../db/schema.js";
+import { checkIns, events, hosts, teams } from "../db/schema.js";
 import { giftSummary } from "../services/gifts.js";
 import { confirmHostLocation, createVirtualStation, listStationsAdmin, removeStation, requiredStationCount, stationsForParticipant } from "../services/stations.js";
 
@@ -18,11 +18,15 @@ export async function registerStationRoutes(app: FastifyInstance, { cfg, db, hub
   app.post("/api/geocode", async (req, reply) => {
     const who = req.admin?.id ?? req.access?.credentialId;
     if (!who) return reply.code(401).send({ error: "unauthorized", message: "Jelentkezz be." });
-    const { address } = z.object({ address: z.string().min(5).max(300) }).parse(req.body);
+    const { address, eventId } = z.object({ address: z.string().min(5).max(300), eventId: uuid.optional() }).parse(req.body);
     if (!(await hit(db, "geocode_user", who, 20, 600))) throw new GeocodeError("rate_limited", "Túl sok címkeresés. Próbáld újra később.");
-    const r = await geocodeAddress(db, geocoders, address);
-    // Nem található: a kliens kézi markerhelyezést kínál
-    return r ? { found: true, lat: r.lat, lon: r.lon, label: r.label } : { found: false };
+    // Résztvevőnél az esemény a munkamenetből adódik; adminnál a kliens küldi
+    const evId = req.access?.eventId ?? eventId;
+    const [ev] = evId ? await db.select().from(events).where(eq(events.id, evId)) : [];
+    const center = ev?.centerLat != null && ev.centerLon != null ? { lat: ev.centerLat, lon: ev.centerLon } : null;
+    const r = await geocodeAddress(db, geocoders, ev?.locality ? withLocality(address, ev.locality) : address);
+    // Nem található: a kliens kézi markerhelyezést kínál (az esemény településének közepéről indulva)
+    return r ? { found: true, lat: r.lat, lon: r.lon, label: r.label, center } : { found: false, center };
   });
 
   // ---------- Host ----------

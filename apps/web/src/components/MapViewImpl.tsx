@@ -10,8 +10,10 @@ interface Cfg { tileUrl: string; tileAttribution: string }
  * MapLibre alapú térkép. A csempeszolgáltató a szerver /api/public/config végpontjáról jön (cserélhető),
  * az attribúció mindig látszik. A markereknek szám + állapotjel is van (nem csak szín).
  */
-export function MapView({ markers, onMarkerClick, draggable, onDrag, height }: {
+export function MapView({ markers, onMarkerClick, draggable, onDrag, height, center }: {
   markers: Marker[]; onMarkerClick?: (id: string) => void; draggable?: boolean; onDrag?: (lat: number, lon: number) => void; height?: string;
+  /** Az esemény települése: ez a kezdőnézet, és ha nincs marker, ez marad. */
+  center?: { lat: number; lon: number } | null;
 }) {
   const cfg = useFetch<Cfg>("/api/public/config", { cacheKey: "map-config" });
   const el = useRef<HTMLDivElement>(null);
@@ -30,7 +32,7 @@ export function MapView({ markers, onMarkerClick, draggable, onDrag, height }: {
         sources: { base: { type: "raster", tiles: [cfg.data.tileUrl.replace("{s}", "a")], tileSize: 256, attribution: cfg.data.tileAttribution, maxzoom: 19 } },
         layers: [{ id: "base", type: "raster", source: "base" }],
       },
-      center: [19.0402, 47.4979],
+      center: [center?.lon ?? 19.0402, center?.lat ?? 47.4979],
       zoom: 14,
       attributionControl: { compact: false },
     });

@@ -7,7 +7,7 @@ import { Loading } from "../../components/ui";
 import { useAdminMe } from "../../session";
 
 export interface AdminEvent {
-  id: string; name: string; type: string; status: string; shortDescription: string; rules: string; organizerContact: string; checkinRadiusM: number;
+  id: string; name: string; type: string; status: string; shortDescription: string; rules: string; organizerContact: string; locality: string; checkinRadiusM: number;
   registrationStart: string; registrationClose: string; modificationDeadline: string; plannedStart: string; plannedEnd: string; actualStart: string | null; actualEnd: string | null;
   cancellationReason: string | null;
 }

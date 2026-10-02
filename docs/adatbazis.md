@@ -74,6 +74,9 @@ Megkötések / indexek: `admins_email_uq` (egyedi)
 | actual_end | timestamptz |  |
 | checkin_radius_m | integer | not null default 120 |
 | organizer_contact | text | not null default "" |
+| locality | text | not null default "" — település: a címkeresést erre szűkíti (pl. csak "Fő utca 12." esetén) |
+| center_lat | double | — a település geokódolt közepe (térkép-fókusz) |
+| center_lon | double |  |
 | cancellation_reason | text |  |
 | next_station_number | integer | not null default 1 |
 | anonymized_at | timestamptz | — személyes adatok anonimizálásának időpontja (megőrzési szabály) |

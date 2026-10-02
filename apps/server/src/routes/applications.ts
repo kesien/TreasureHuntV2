@@ -35,7 +35,7 @@ export async function registerApplicationRoutes(app: FastifyInstance, { cfg, db,
   const publicFields = (e: typeof events.$inferSelect) => ({
     id: e.id, name: e.name, type: e.type, shortDescription: e.shortDescription, rules: e.rules, status: e.status,
     registrationStart: e.registrationStart, registrationClose: e.registrationClose, modificationDeadline: e.modificationDeadline,
-    plannedStart: e.plannedStart, plannedEnd: e.plannedEnd, organizerContact: e.organizerContact,
+    plannedStart: e.plannedStart, plannedEnd: e.plannedEnd, organizerContact: e.organizerContact, locality: e.locality,
     // Szándékosan nincs állomásszám, cím, koordináta vagy térkép (spec §25)
   });
 

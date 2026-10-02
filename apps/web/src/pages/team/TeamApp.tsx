@@ -17,7 +17,7 @@ export interface TeamStation {
   id: string; number: number; label: string; address: string; latitude: number; longitude: number; pickupMode: string; participantNote: string | null;
   completed: boolean; giftStatus: "has_gifts" | "depleted"; giftNote: string | null; likelyOut: boolean;
 }
-interface StationsResp { revealed: boolean; count: number; radiusM?: number; stations?: TeamStation[] }
+interface StationsResp { revealed: boolean; count: number; radiusM?: number; center?: { lat: number; lon: number } | null; stations?: TeamStation[] }
 interface Progress { firstCheckInAt: string | null; completed: number; required: number; finished: boolean; frozen: boolean; elapsedSec: number; completedStationIds: string[] }
 export interface TeamInfo {
   id: string; name: string; status: string; counts: { children: number; adults: number; total: number };
@@ -50,7 +50,7 @@ function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () 
   const progressQ = useFetch<Progress>("/api/access/progress", { cacheKey: "progress" });
   const q = useQueue();
   const online = useOnline();
-  const [mode, setMode] = useState<"list" | "map">("list");
+  const [mode, setMode] = useState<"list" | "map">("map");
   const [filter, setFilter] = useState<Filter>("all");
   const [selected, setSelected] = useState<string | null>(null);
   const reloadAll = useCallback(() => { stationsQ.reload(); progressQ.reload(); reloadTeam(); }, [stationsQ.reload, progressQ.reload, reloadTeam]);
@@ -107,12 +107,12 @@ function Stations({ team, reloadTeam }: { team: TeamInfo | null; reloadTeam: () 
                 ))}
               </div>
               <div className="chips" role="group" aria-label="Nézet">
-                <button type="button" className="chip" aria-pressed={mode === "list"} onClick={() => setMode("list")}>Lista</button>
                 <button type="button" className="chip" aria-pressed={mode === "map"} onClick={() => setMode("map")}>Térkép</button>
+                <button type="button" className="chip" aria-pressed={mode === "list"} onClick={() => setMode("list")}>Lista</button>
               </div>
             </div>
             {mode === "map" ? (
-              <MapView markers={markers} onMarkerClick={setSelected} />
+              <MapView markers={markers} center={stationsQ.data.center} onMarkerClick={setSelected} />
             ) : (
               <ul className="list">
                 {shown.map((s) => (

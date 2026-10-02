@@ -26,6 +26,13 @@ export class NominatimProvider implements GeocoderProvider {
   }
 }
 
+/** A település hozzáfűzése a kereséshez, ha a cím még nem tartalmazza (pl. "Fő utca 12." + "Derekegyháza"). */
+export function withLocality(address: string, locality: string): string {
+  const loc = locality.trim();
+  if (!loc || normalizeAddress(address).includes(normalizeAddress(loc))) return address;
+  return `${address}, ${loc}`;
+}
+
 export class GeocodeError extends Error {
   constructor(public code: "rate_limited" | "unavailable", message: string) { super(message); }
 }

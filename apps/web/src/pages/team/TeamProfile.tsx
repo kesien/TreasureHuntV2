@@ -54,7 +54,7 @@ export function TeamProfile({ team, reload }: { team: TeamInfo | null; reload: (
             <div style={{ flex: 1, minWidth: 110 }}>
               <Field label="Kategória"><Select value={m.category} disabled={!editable} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, category: e.target.value as "child" | "adult" } : x))}><option value="child">Gyermek</option><option value="adult">Felnőtt</option></Select></Field>
             </div>
-            {editable && members.length > 1 && <Button small variant="ghost" aria-label={`${i + 1}. tag törlése`} onClick={() => setMembers(members.filter((_, j) => j !== i))}>🗑</Button>}
+            {editable && members.length > 1 && <Button small variant="ghost" style={{ marginBottom: 12 }} aria-label={`${i + 1}. tag törlése`} onClick={() => setMembers(members.filter((_, j) => j !== i))}>🗑</Button>}
           </div>
         ))}
         {editable && <Button variant="secondary" small onClick={() => setMembers([...members, { name: "", category: "child" }])}>+ Tag hozzáadása</Button>}

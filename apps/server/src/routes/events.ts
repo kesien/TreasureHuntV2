@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { EVENT_STATUSES, EVENT_TYPES } from "@th/shared";
 import { requireAdmin, type RouteCtx } from "../app.js";
-import { createEvent, deleteEmptyDraft, getEvent, listEvents, transitionEvent, updateEvent } from "../services/events.js";
+import { createEvent, deleteEmptyDraft, getEvent, listEvents, refreshEventCenter, transitionEvent, updateEvent } from "../services/events.js";
 
 const date = z.coerce.date();
 const eventBody = z.object({
@@ -17,9 +17,10 @@ const eventBody = z.object({
   plannedEnd: date,
   checkinRadiusM: z.number().int().min(10).max(1000).optional(),
   organizerContact: z.string().max(500).optional(),
+  locality: z.string().trim().max(100).optional(),
 });
 
-export async function registerEventRoutes(app: FastifyInstance, { cfg, db, hub }: RouteCtx) {
+export async function registerEventRoutes(app: FastifyInstance, { cfg, db, hub, geocoders }: RouteCtx) {
   app.get("/api/admin/events", async (req, reply) => {
     if (!requireAdmin(req, reply)) return;
     return listEvents(db);
@@ -33,7 +34,10 @@ export async function registerEventRoutes(app: FastifyInstance, { cfg, db, hub }
 
   app.post("/api/admin/events", async (req, reply) => {
     if (!requireAdmin(req, reply)) return;
-    const ev = await createEvent(db, req.admin.id, eventBody.parse(req.body));
+    const body = eventBody.parse(req.body);
+    const created = await createEvent(db, req.admin.id, body);
+    if (body.locality) await refreshEventCenter(db, geocoders, created.id);
+    const ev = await getEvent(db, created.id);
     hub.publish("admin", "events");
     return reply.code(201).send(ev);
   });
@@ -41,7 +45,9 @@ export async function registerEventRoutes(app: FastifyInstance, { cfg, db, hub }
   app.patch("/api/admin/events/:id", async (req, reply) => {
     if (!requireAdmin(req, reply)) return;
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
-    const r = await updateEvent(db, req.admin.id, id, eventBody.partial().parse(req.body));
+    const patch = eventBody.partial().parse(req.body);
+    const r = await updateEvent(db, req.admin.id, id, patch);
+    if (patch.locality !== undefined) await refreshEventCenter(db, geocoders, id);
     hub.publish("admin", "events");
     hub.publish(`event:${id}`, "event");
     return r;

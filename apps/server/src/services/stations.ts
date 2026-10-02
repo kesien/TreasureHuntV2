@@ -121,6 +121,7 @@ export async function stationsForParticipant(db: Db, eventId: string, now = new 
   if (!revealed) return { revealed: false as const, count: rows.length };
   return {
     revealed: true as const, count: rows.length, radiusM: ev.checkinRadiusM,
+    center: ev.centerLat != null && ev.centerLon != null ? { lat: ev.centerLat, lon: ev.centerLon } : null,
     stations: rows.map((s) => ({
       id: s.id, number: s.number, label: `Állomás #${s.number}`, address: s.address, latitude: s.latitude, longitude: s.longitude,
       pickupMode: s.pickupMode, participantNote: s.participantNote,

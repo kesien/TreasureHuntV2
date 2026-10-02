@@ -70,6 +70,9 @@ export const events = pgTable("events", {
   actualEnd: ts("actual_end"),
   checkinRadiusM: integer("checkin_radius_m").notNull().default(120),
   organizerContact: text("organizer_contact").notNull().default(""),
+  locality: text("locality").notNull().default(""), // település: a címkeresést erre szűkíti (pl. csak "Fő utca 12." esetén)
+  centerLat: doublePrecision("center_lat"), // a település geokódolt közepe (térkép-fókusz)
+  centerLon: doublePrecision("center_lon"),
   cancellationReason: text("cancellation_reason"),
   nextStationNumber: integer("next_station_number").notNull().default(1),
   anonymizedAt: ts("anonymized_at"), // személyes adatok anonimizálásának időpontja (megőrzési szabály)

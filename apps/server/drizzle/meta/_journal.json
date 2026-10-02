@@ -57,6 +57,13 @@
       "when": 1790930793874,
       "tag": "0007_m7_ops",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790943485866,
+      "tag": "0008_event_locality",
+      "breakpoints": true
     }
   ]
 }

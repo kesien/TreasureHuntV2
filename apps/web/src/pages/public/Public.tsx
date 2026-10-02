@@ -8,7 +8,7 @@ import { useAccessMe } from "../../session";
 
 export interface PublicEvent {
   id: string; name: string; type: "halloween" | "easter"; shortDescription: string; rules: string; status: string;
-  registrationStart: string; registrationClose: string; modificationDeadline: string; plannedStart: string; plannedEnd: string; organizerContact: string;
+  registrationStart: string; registrationClose: string; modificationDeadline: string; plannedStart: string; plannedEnd: string; organizerContact: string; locality?: string;
 }
 
 function useTheme(type?: string) {
@@ -125,7 +125,7 @@ export function TeamApply() {
         <div className="row" key={i} style={{ alignItems: "flex-end" }}>
           <div style={{ flex: 2, minWidth: 140 }}><Field label={`Tag ${i + 1} neve`}><Input required value={m.name} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} /></Field></div>
           <div style={{ flex: 1, minWidth: 110 }}><Field label="Kategória"><Select value={m.category} onChange={(e) => setMembers(members.map((x, j) => j === i ? { ...x, category: e.target.value as "child" | "adult" } : x))}><option value="child">Gyermek</option><option value="adult">Felnőtt</option></Select></Field></div>
-          {members.length > 1 && <Button small variant="ghost" aria-label={`${i + 1}. tag törlése`} onClick={() => setMembers(members.filter((_, j) => j !== i))}>🗑</Button>}
+          {members.length > 1 && <Button small variant="ghost" style={{ marginBottom: 12 }} aria-label={`${i + 1}. tag törlése`} onClick={() => setMembers(members.filter((_, j) => j !== i))}>🗑</Button>}
         </div>
       ))}
       <Button variant="secondary" small onClick={() => setMembers([...members, { name: "", category: "child" }])}>+ Tag hozzáadása</Button>

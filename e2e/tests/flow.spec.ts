@@ -35,7 +35,12 @@ test("teljes folyamat: admin → jelentkezés → jóváhagyás → check-in (on
   // ---------- Admin: esemény létrehozása és megnyitása ----------
   await admin.getByRole("link", { name: "Események" }).click();
   await admin.getByRole("button", { name: "+ Új esemény" }).click();
-  await admin.getByLabel("Név", { exact: true }).fill("E2E Halloween");
+  // Karakterenkénti gépelés: a modal nem lophatja el a fókuszt (korábbi hiba: az első betű után átugrott)
+  const nameInput = admin.getByLabel("Név", { exact: true });
+  await nameInput.click();
+  await nameInput.pressSequentially("E2E Halloween");
+  await expect(nameInput).toBeFocused();
+  await expect(nameInput).toHaveValue("E2E Halloween");
   await admin.getByLabel("Jelentkezés kezdete").fill(localInput(-3600_000));
   await admin.getByLabel("Jelentkezés lezárása").fill(localInput(20 * 60_000));
   await admin.getByLabel(/Módosítási/).fill(localInput(30 * 60_000));

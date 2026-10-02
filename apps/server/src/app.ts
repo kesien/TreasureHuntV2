@@ -56,6 +56,9 @@ export async function buildApp({ cfg, db, geocoders = [new NominatimProvider()],
   const tileOrigin = cfg.TILE_URL.includes("{s}") ? `https://*.${tileHost.split(".").slice(1).join(".")}` : `https://${tileHost}`;
 
   await app.register(helmet, {
+    // A publikus OSM csempeszerver Referer nélkül blokkol ("Access blocked"). Idegen origin felé csak az origin
+    // megy ki (útvonal nem), így a belépési token az URL-ben nem szivároghat.
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],

@@ -11,7 +11,7 @@ Az admin felület: `https://<domain>/admin`. Minden admin azonos jogosultságú.
 
 ## Egy esemény menete
 
-1. **Események → Új esemény**: név, típus (Halloween/Húsvét – a megjelenés automatikus), leírás, szabályzat, jelentkezési időszak, **módosítási (és visszalépési) határidő**, tervezett kezdés/vége, GPS-sugár (alap 120 m), szervezői kapcsolat. A rendszer a dátumsorrendet ellenőrzi, és szerkesztéskor figyelmeztet, ha a változás a résztvevőket érintheti (jelentkezés, határidő, T−24 felfedés).
+1. **Események → Új esemény**: név, típus (Halloween/Húsvét – a megjelenés automatikus), **település** (pl. Derekegyháza: a címkeresés ezt hozzáfűzi, így a hostoknak elég az utca és házszám, és a résztvevői térkép is erre fókuszál; a szerver geokódolja), leírás, szabályzat, jelentkezési időszak, **módosítási (és visszalépési) határidő**, tervezett kezdés/vége, GPS-sugár (alap 120 m), szervezői kapcsolat. A rendszer a dátumsorrendet ellenőrzi, és szerkesztéskor figyelmeztet, ha a változás a résztvevőket érintheti (jelentkezés, határidő, T−24 felfedés).
 2. **Jelentkezés megnyitása** (Tervezés → Jelentkezés nyitva). A nyilvános oldal ekkor jelenik meg, a jelentkezés a lezárási időpontban magától lezárul.
 3. **Jelentkezők elbírálása** (Csapatok és hostok):
    - *Csapat*: Jóváhagy / Elutasít (indok kötelező, a jelentkező e-mailben megkapja).

@@ -108,7 +108,7 @@ function PeopleFor({ event }: { event: AdminEvent }) {
         <Sheet title="Állomás pozíciója" onClose={() => { setPick(null); reload(); }}>
           <p><b>{pick.address}</b></p>
           <p className="muted">Keresd meg a címet, szükség esetén húzd a jelölőt a pontos helyre, majd erősítsd meg. A host neve a csapatoknak sosem látszik.</p>
-          <LocationPicker address={pick.address} initial={pick.latitude != null && pick.longitude != null ? { lat: pick.latitude, lon: pick.longitude } : null}
+          <LocationPicker address={pick.address} eventId={event.id} initial={pick.latitude != null && pick.longitude != null ? { lat: pick.latitude, lon: pick.longitude } : null}
             onConfirm={async (lat, lon) => {
               const r = await api<{ duplicateWarnings: Array<{ stationNumber: number; distanceM: number }> }>(`/api/admin/hosts/${pick.id}/location`, { method: "PUT", body: { lat, lon } });
               if (r.duplicateWarnings.length) toast(`Figyelem: ${r.duplicateWarnings.map((d) => `#${d.stationNumber} állomás ${d.distanceM} m-re`).join(", ")} van. Lehetséges duplikáció – a döntés a tiéd.`);

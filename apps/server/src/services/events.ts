@@ -6,6 +6,7 @@ import { pgError } from "../lib/dbError.js";
 import { audit } from "./audit.js";
 import { revokeAccess } from "./accessAuth.js";
 import { enqueueEmail } from "./outbox.js";
+import { geocodeAddress, type GeocoderProvider } from "./geocode.js";
 import type { Config } from "../config.js";
 
 export class EventError extends Error {
@@ -26,6 +27,7 @@ export interface EventInput {
   plannedEnd: Date;
   checkinRadiusM?: number;
   organizerContact?: string;
+  locality?: string;
 }
 
 export async function createEvent(db: Db, adminId: string, input: EventInput) {
@@ -129,4 +131,23 @@ export async function deleteEmptyDraft(db: Db, adminId: string, id: string) {
 
 export async function listEvents(db: Db) {
   return db.select().from(events).orderBy(sql`${events.plannedStart} desc`);
+}
+
+/**
+ * Az esemény településének geokódolása (térkép-fókusz). Hibatűrő: ha a keresés nem sikerül, a közép üres marad,
+ * és a kliens az alapértelmezett nézetre esik vissza.
+ */
+export async function refreshEventCenter(db: Db, geocoders: GeocoderProvider[], eventId: string) {
+  const ev = await getEvent(db, eventId);
+  const locality = ev.locality.trim();
+  let center: { lat: number; lon: number } | null = null;
+  if (locality) {
+    try {
+      const r = await geocodeAddress(db, geocoders, locality);
+      if (r) center = { lat: r.lat, lon: r.lon };
+    } catch {
+      // a közép nem kritikus
+    }
+  }
+  await db.update(events).set({ centerLat: center?.lat ?? null, centerLon: center?.lon ?? null }).where(eq(events.id, eventId));
 }
