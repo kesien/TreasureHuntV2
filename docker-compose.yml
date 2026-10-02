@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    container_name: treasure-hunt-db
     environment:
       POSTGRES_USER: th
       POSTGRES_PASSWORD: ${DB_PASSWORD:-th}
@@ -14,8 +15,11 @@ services:
       test: ["CMD-SHELL", "pg_isready -U th"]
       interval: 5s
       retries: 10
+    networks:
+      - treasure
   app:
     build: .
+    container_name: treasure-hunt
     env_file: .env
     environment:
       DATABASE_URL: postgres://th:${DB_PASSWORD:-th}@db:5432/th
@@ -27,15 +31,24 @@ services:
       - photos:/data/photos
       - backups:/data/backups
     # Csak a reverse proxy érje el (HTTPS ott végződik); közvetlen internetre nem szabad kitenni
-    ports:
-      - "127.0.0.1:3000:3000"
+    expose:
+      - "3000"
     restart: unless-stopped
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "5" }
+    networks:
+      - treasure
+      - nginx
 volumes:
   pgdata:
   photos:
   backups:
+
+networks:
+  treasure:
+    name: treasure
+  nginx:
+    external: true
