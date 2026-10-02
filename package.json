@@ -1,0 +1,26 @@
+{
+  "name": "treasure-hunt-v2",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "e2e"
+  ],
+  "scripts": {
+    "build": "npm run build -w @th/shared && npm run build -w @th/server && npm run build -w @th/web",
+    "test": "npm run test -w @th/shared && npm run test -w @th/server && npm run test -w @th/web",
+    "typecheck": "npm run typecheck -w @th/shared && npm run typecheck -w @th/server && npm run typecheck -w @th/web",
+    "db:generate": "npm run db:generate -w @th/server",
+    "db:migrate": "npm run db:migrate -w @th/server",
+    "admin:bootstrap": "npm run admin:bootstrap -w @th/server",
+    "dev": "npm run dev -w @th/server",
+    "test:e2e": "npm run test -w @th/e2e"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "drizzle-orm": "^0.45.3"
+  }
+}
